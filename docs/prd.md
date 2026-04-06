@@ -39,6 +39,27 @@ Um sistema simples onde um organizador cria o evento, convida participantes via 
 
 ## 📝 4. Escopo Funcional (User Stories)
 
+## 🔐 **Gestão do Organizador**
+* **US01**: Como *organizador*, eu quero criar uma conta e fazer login para salvar e gerenciar (cadastrar, ler, editar e deletar) meus sorteios.
+* **US02**: Como *organizador*, eu quero cadastrar um novo evento (nome, data, valor e local) para detalhar a troca de presentes.
+* **US03**: Como *organizador*, eu quero adicionar participantes (nome e e-mail) para montar a lista do sorteio.
+* **US04**: Como *organizador*, eu quero disparar o sorteio para que o sistema gere as combinações secretas.
+* **US05**: Como *organizador*, eu quero copiar o link individual de cada amigo para enviá-los via WhatsApp ou e-mail.
+
+---
+
+## 🎁 **Experiência do Participante**
+* **US06**: Como *participante*, eu quero confirmar minha identidade ao abrir o link para evitar que meu sorteado seja revelado por engano.
+* **US07**: Como *participante*, eu quero visualizar o nome de quem eu tirei de forma oculta para manter o segredo.
+* **US08**: Como *participante*, eu quero cadastrar minha lista de desejos (3 sugestões) antes de ver meu sorteado.
+* **US09**: Como *participante*, eu quero ver as sugestões de presente da pessoa que eu tirei.
+
+---
+
+## ⚙️ **Experiência e Navegação**
+* **US10**: Como *usuário*, eu quero navegar por uma interface responsiva e instalável (PWA) para que eu possa usar o sistema facilmente em qualquer dispositivo, mesmo com conexão limitada.
+* **US11**: Como *usuário*, eu quero que o sistema carregue rapidamente e de forma progressiva para que a experiência seja fluida mesmo em redes lentas.
+
 ## 🛡️ 5. Regras de Negócio (Constraints)
 
 ## 🚫 6. Fora de Escopo (Non-goals)
