@@ -97,4 +97,21 @@ Um sistema simples onde um organizador cria o evento, convida participantes via 
 
 ## ⚙️ 7. Requisitos Não Funcionais (Qualidade)
 
+* **Performance e Carregamento Progressivo**
+  O sistema deve carregar rapidamente, mesmo em redes lentas, utilizando carregamento sob demanda. Isso é essencial para garantir uma boa experiência principalmente no momento crítico de acesso ao resultado do sorteio (US07) e navegação geral (US11).
+* **Segurança e Privacidade dos Dados**
+  O acesso às informações deve ser restrito e seguro, garantindo que cada participante visualize apenas seu próprio amigo secreto. Isso é fundamental para preservar a confiança no sistema e cumprir as regras de sigilo do sorteio (US06, US07).
+* **Experiência Mobile-First e Responsiva**
+  A interface deve ser pensada prioritariamente para dispositivos móveis, adaptando-se a diferentes tamanhos de tela. Isso é crítico, pois a maioria dos participantes acessará o sistema via link compartilhado em aplicativos como WhatsApp (US05, US10).
+* **Reatividade e Atualização em Tempo Real Percebido**
+  A interface deve responder imediatamente às ações do usuário (ex: cadastro, confirmação, visualização), sem necessidade de recarregar a página. Isso melhora a fluidez da experiência e reduz fricção nas interações principais (US03, US08).
+
 ## 🛠️ 8. Tech Stack Principal (Diretrizes)
+
+A arquitetura do sistema será baseada nas seguintes diretrizes obrigatórias:
+
+* **Frontend:** Angular 21+ (Arquitetura Standalone & Signals)
+* **Backend & Autenticação:** Supabase (PostgreSQL + Row Level Security)
+* **Estilização:** Tailwind CSS + UI Components (ex: Spartan)
+* **Hospedagem:** Render.com / Vercel
+* **Controle de Versão**: Git/GitHub utilizando a metodologia Gitflow (branches main, develop e feature/[nome-da-feature]).
