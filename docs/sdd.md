@@ -1,90 +1,346 @@
 # 🛠️ Software Design Document (SDD)
 
-**Projeto:** Hidden Friend
+**Projeto:** [Hidden Friend]  
 **Versão:** 1.0.0  
 **Status:** ⚪ Aguardando Geração de Especificações.
 
+---
+
 ## 🤖 1. Orquestração e Contexto de IA (MCP)
+
 > Configuração dos servidores Model Context Protocol para a IDE Agêntica.
 
-* **Figma/Stitch MCP:** `[LINK DO ARQUIVO FIGMA - A definir na Etapa 4]` (Ler design tokens, cores e hierarquia visual Mobile-First).
-* **Supabase MCP:** Contexto do esquema PostgreSQL, tabelas `events` e `participants`, e políticas de Row Level Security (RLS).
-* **GitHub MCP:** Leitura das Issues do Kanban (US01 a US11) para orientar a implementação das regras de negócio (Spec-Driven Development).
+- **Figma MCP:** `[LINK DO ARQUIVO FIGMA]` (Ler design tokens, cores e hierarquia visual)
+- **Supabase MCP:** Contexto do banco de dados real e políticas de RLS
+- **GitHub MCP:** Leitura das Issues do Kanban para orientar a implementação (Spec-Driven)
+
+---
 
 ## 📦 2. Stack Tecnológica e Bibliotecas
+
 > Definição estrita das tecnologias permitidas (package.json). Nenhuma dependência externa deve ser instalada sem refletir aqui.
 
-* **Core:** Angular 18/19+ (Arquitetura estritamente Standalone e reatividade via Signals).
-* **BaaS & Auth:** `@supabase/supabase-js` para autenticação e banco de dados.
-* **Estilização & UI:** `[A DEFINIR: Tailwind CSS ou PrimeNG]` e biblioteca de ícones correspondente.
-* **Utilitários:** `[A DEFINIR conforme necessidade, ex: date-fns para datas]`.
+* **Core:** Angular 21+ (Standalone / Signals).
+* **BaaS & Auth:** Supabase-js.
+* **Estilização & UI:** Tailwind CSS, Spartan UI (HLM), Lucide Angular (Ícones).
+* **Utilitários:** [Ex: date-fns para datas, zod para schemas].
 
 ## 🗄️ 3. Arquitetura de Dados
 
 ### 📖 3.1. Glossário Técnico (Mapeamento)
-| Termo PRD (PT-BR) | Entidade Técnica (EN) | Atributos Principais |
-| :--- | :--- | :--- |
-| Organizador | `auth.users` (Supabase) | `id`, `email` |
-| Evento/Sorteio | `events` | `id`, `organizer_id`, `name`, `exchange_date`, `budget`, `location` |
-| Participante | `participants` | `id`, `event_id`, `name`, `email`, `secret_token` (UUID), `drawn_participant_id` |
-| Lista de Desejos | `wishlist` | Embutido em `participants` como `wishlist_items` (array de strings) ou campos `wishlist_1`, `wishlist_2`. |
+
+| Termo PRD (PT-BR)        | Entidade Técnica (EN - snake_case) | Atributos Principais                                                               |
+| :----------------------- | :--------------------------------- | :--------------------------------------------------------------------------------- |
+| Evento                   | `events`                           | `id`, `organizer_id`, `name`, `date`, `location`, `suggested_gift_value`, `status` |
+| Organizador              | `users`                            | `id`, `email`, `password_hash`, `created_at`                                       |
+| Participante             | `participants`                     | `id`, `event_id`, `name`, `email`, `token`, `confirmed_at`                         |
+| Sorteio                  | `draws`                            | `id`, `event_id`, `performed_at`                                                   |
+| Resultado do Sorteio     | `draw_results`                     | `id`, `draw_id`, `giver_participant_id`, `receiver_participant_id`                 |
+| Amigo Secreto (Sorteado) | `draw_results`                     | `giver_participant_id`, `receiver_participant_id`                                  |
+| Lista de Desejos         | `wishlists`                        | `id`, `participant_id`, `wish_1`, `wish_2`, `wish_3`, `created_at`                 |
+| Link de Acesso           | `participant_access_tokens`        | `id`, `participant_id`, `token`, `expires_at`, `created_at`                        |
+
+---
 
 ### 📊 3.2. Diagrama ER (Mermaid)
-> [O Código do Diagrama Mermaid será inserido aqui no próximo passo após a modelagem fina das tabelas]
+
+```mermaid
+erDiagram
+
+    users {
+        uuid id PK
+        string email
+        string password_hash
+        timestamp created_at
+    }
+
+    events {
+        uuid id PK
+        uuid organizer_id FK
+        string name
+        date date
+        string location
+        numeric suggested_gift_value
+        string status
+        timestamp created_at
+    }
+
+    participants {
+        uuid id PK
+        uuid event_id FK
+        string name
+        string email
+        string token
+        timestamp confirmed_at
+        timestamp created_at
+    }
+
+    draws {
+        uuid id PK
+        uuid event_id FK
+        timestamp performed_at
+    }
+
+    draw_results {
+        uuid id PK
+        uuid draw_id FK
+        uuid giver_participant_id FK
+        uuid receiver_participant_id FK
+    }
+
+    wishlists {
+        uuid id PK
+        uuid participant_id FK
+        string wish_1
+        string wish_2
+        string wish_3
+        timestamp created_at
+    }
+
+    participant_access_tokens {
+        uuid id PK
+        uuid participant_id FK
+        string token
+        timestamp expires_at
+        timestamp created_at
+    }
+
+    users ||--o{ events : organizes
+    events ||--o{ participants : has
+    events ||--o{ draws : has
+    draws ||--o{ draw_results : generates
+    participants ||--|| wishlists : has
+    participants ||--o{ draw_results : giver
+    participants ||--o{ draw_results : receiver
+    participants ||--o{ participant_access_tokens : has
+````
+
+---
 
 ## 📑 4. Contratos Globais (Interfaces & Types)
-> Tipagem TypeScript baseada no banco de dados.
 
-```typescript
-export interface AppEvent {
+📁 **Localização:** `src/app/core/models/`
+
+```ts
+// user.model.ts
+export interface User {
+  id: string;
+  email: string;
+  password_hash: string;
+  created_at: string;
+}
+```
+
+```ts
+// event.model.ts
+export interface Event {
   id: string;
   organizer_id: string;
   name: string;
-  exchange_date: string;
-  budget: number | null;
-  location: string | null;
+  date: string;
+  location: string;
+  suggested_gift_value: number;
+  status: string;
   created_at: string;
 }
+```
 
+```ts
+// participant.model.ts
 export interface Participant {
   id: string;
   event_id: string;
   name: string;
   email: string;
-  secret_token: string;
-  drawn_participant_id: string | null;
-  wishlist_items: string[] | null;
+  token: string;
+  confirmed_at: string | null;
+  created_at: string;
 }
 ```
+
+```ts
+// draw.model.ts
+export interface Draw {
+  id: string;
+  event_id: string;
+  performed_at: string;
+}
+```
+
+```ts
+// draw-result.model.ts
+export interface DrawResult {
+  id: string;
+  draw_id: string;
+  giver_participant_id: string;
+  receiver_participant_id: string;
+}
+```
+
+```ts
+// wishlist.model.ts
+export interface Wishlist {
+  id: string;
+  participant_id: string;
+  wish_1: string;
+  wish_2: string;
+  wish_3: string;
+  created_at: string;
+}
+```
+
+```ts
+// participant-access-token.model.ts
+export interface ParticipantAccessToken {
+  id: string;
+  participant_id: string;
+  token: string;
+  expires_at: string;
+  created_at: string;
+}
+```
+
+---
 
 ## 🏗️ 5. Scaffolding Macro (Arquitetura Frontend)
 
 ### 📂 5.1. Estrutura de Pastas Base
-* **`src/app/core/`**: Services globais singleton (Supabase), Interceptors (se houver API externa), Functional Guards (Auth).
-* **`src/app/features/`**: Smart Components (Páginas: Login, Dashboard, Evento, Revelação) que gerenciam rotas e consomem services.
-* **`src/app/shared/`**: UI Components (Dumb), pipes de formatação de moeda/data estritamente reutilizáveis.
+
+```bash
+src/app/
+
+├── core/
+│   ├── services/
+│   │   ├── auth.service.ts
+│   │   ├── event.service.ts
+│   │   ├── participant.service.ts
+│   │   ├── draw.service.ts
+│   │   └── wishlist.service.ts
+│   │
+│   ├── guards/
+│   │   ├── auth.guard.ts
+│   │   └── event-access.guard.ts
+│   │
+│   ├── interceptors/
+│   │   └── auth.interceptor.ts
+│   │
+│   ├── models/
+│   │   └── (interfaces globais ou adapters temporários até seção 4)
+│   │
+│   └── utils/
+│       ├── token.util.ts
+│       └── validation.util.ts
+│
+├── features/
+│   ├── auth/
+│   │   ├── login/
+│   │   │   └── login.page.ts
+│   │   └── register/
+│   │       └── register.page.ts
+│   │
+│   ├── events/
+│   │   ├── event-create/
+│   │   │   └── event-create.page.ts
+│   │   ├── event-list/
+│   │   │   └── event-list.page.ts
+│   │   ├── event-detail/
+│   │   │   └── event-detail.page.ts
+│   │   └── event-manage/
+│   │       └── event-manage.page.ts
+│   │
+│   ├── participants/
+│   │   ├── participant-add/
+│   │   │   └── participant-add.page.ts
+│   │   └── participant-list/
+│   │       └── participant-list.page.ts
+│   │
+│   ├── draw/
+│   │   ├── draw-execute/
+│   │   │   └── draw-execute.page.ts
+│   │   └── draw-result/
+│   │       └── draw-result.page.ts
+│   │
+│   ├── wishlist/
+│   │   └── wishlist-form/
+│   │       └── wishlist-form.page.ts
+│   │
+│   └── public/
+│       ├── access/
+│       │   └── access.page.ts
+│       ├── confirm-identity/
+│       │   └── confirm-identity.page.ts
+│       └── reveal/
+│           └── reveal.page.ts
+│
+├── shared/
+│   ├── components/
+│   │   ├── ui/
+│   │   │   ├── button/
+│   │   │   ├── input/
+│   │   │   ├── card/
+│   │   │   └── modal/
+│   │   │
+│   │   ├── layout/
+│   │   │   ├── header/
+│   │   │   ├── container/
+│   │   │   └── page-wrapper/
+│   │   │
+│   │   └── feedback/
+│   │       ├── loading-spinner/
+│   │       ├── empty-state/
+│   │       └── error-message/
+│   │
+│   ├── directives/
+│   │   └── (ex: autofocus.directive.ts)
+│   │
+│   ├── pipes/
+│   │   └── (ex: currency-format.pipe.ts)
+│   │
+│   └── constants/
+```
+
+---
 
 ### 🚦 5.2. Mapa de Rotas e Páginas (Features)
-| Rota | Page Component | Functional Guard |
-| :--- | :--- | :--- |
-| `/login` | `src/app/features/auth/login.page.ts` | Público (Redireciona se logado) |
-| `/dashboard` | `src/app/features/dashboard/dashboard.page.ts` | `authGuard` (Requer Login) |
-| `/event/:id` | `src/app/features/event-details/event-details.page.ts` | `authGuard` (Valida dono do evento) |
-| `/reveal/:token` | `src/app/features/reveal/reveal.page.ts` | `validTokenGuard` (Público, valida UUID) |
+
+| Rota                                | Page Component                                                    | Guard                   |
+| :---------------------------------- | :---------------------------------------------------------------- | :---------------------- |
+| `/login`                            | `features/auth/login/login.page.ts`                               | Público                 |
+| `/register`                         | `features/auth/register/register.page.ts`                         | Público                 |
+| `/events`                           | `features/events/event-list/event-list.page.ts`                   | `auth.guard.ts`         |
+| `/events/create`                    | `features/events/event-create/event-create.page.ts`               | `auth.guard.ts`         |
+| `/events/:eventId`                  | `features/events/event-detail/event-detail.page.ts`               | `auth.guard.ts`         |
+| `/events/:eventId/manage`           | `features/events/event-manage/event-manage.page.ts`               | `auth.guard.ts`         |
+| `/events/:eventId/participants`     | `features/participants/participant-list/participant-list.page.ts` | `auth.guard.ts`         |
+| `/events/:eventId/participants/add` | `features/participants/participant-add/participant-add.page.ts`   | `auth.guard.ts`         |
+| `/events/:eventId/draw`             | `features/draw/draw-execute/draw-execute.page.ts`                 | `auth.guard.ts`         |
+| `/events/:eventId/results`          | `features/draw/draw-result/draw-result.page.ts`                   | `auth.guard.ts`         |
+| `/events/:eventId/wishlist`         | `features/wishlist/wishlist-form/wishlist-form.page.ts`           | `auth.guard.ts`         |
+| `/access/:token`                    | `features/public/access/access.page.ts`                           | Público                 |
+| `/confirm/:token`                   | `features/public/confirm-identity/confirm-identity.page.ts`       | `event-access.guard.ts` |
+| `/reveal/:token`                    | `features/public/reveal/reveal.page.ts`                           | `event-access.guard.ts` |
+
+---
 
 ### 🧠 5.3. Core Services (Singleton)
-| Service | Arquivo | Responsabilidade Macro |
-| :--- | :--- | :--- |
-| `AuthService` | `core/services/auth.service.ts` | Gerenciar sessão Supabase, login e logout. |
-| `EventService` | `core/services/event.service.ts` | CRUD da tabela `events` atrelado ao usuário logado. |
-| `ParticipantService` | `core/services/participant.service.ts` | CRUD da tabela `participants` e chamada do algoritmo de sorteio. |
-| `RevealService` | `core/services/reveal.service.ts` | Validar token, salvar wishlist e buscar dados do participante sorteado (ReadOnly). |
+| Service              | Arquivo                  | Responsabilidade Macro                                                                         |
+| :------------------- | :----------------------- | :--------------------------------------------------------------------------------------------- |
+| `AuthService`        | `auth.service.ts`        | Gerenciar autenticação com Supabase (login, registro, logout, sessão).                         |
+| `EventService`       | `event.service.ts`       | CRUD de eventos e gestão de status do evento.                                                  |
+| `ParticipantService` | `participant.service.ts` | Gerenciar participantes (adicionar, listar, remover, validar identidade).                      |
+| `DrawService`        | `draw.service.ts`        | Executar o sorteio respeitando as regras de negócio (RN01, RN02, RN05) e persistir resultados. |
+| `WishlistService`    | `wishlist.service.ts`    | Gerenciar lista de desejos dos participantes (criar, atualizar, buscar).                       |
+| `AccessService`      | `access.service.ts`      | Validar tokens de acesso, controlar fluxo de acesso público (US06, US07, RN03, RN04).          |
+| `SupabaseService`    | `supabase.service.ts`    | Instância central do client Supabase e configuração de conexão.                                |
+
 
 ## 🛡️ 6. Segurança (Supabase RLS)
-> Políticas de acesso a nível de banco de dados.
-
-| Tabela | Política (RLS) |
-| :--- | :--- |
-| `events` | **ALL:** `auth.uid() = organizer_id` (Apenas o dono pode ver, criar, editar ou deletar seu evento). |
-| `participants` | **ALL:** Requer join com `events` onde `auth.uid() = events.organizer_id` (Organizador gerencia os participantes do seu próprio evento). |
-| `participants` | **SELECT/UPDATE:** Público, filtrado estritamente pela cláusula `WHERE secret_token = {token_da_url}` (Permite ao participante atualizar sua wishlist e ver quem tirou, sem expor os demais). |
+| Tabela                      | Política (RLS)                                                                                                                                                                                                                                        |
+| :-------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `users`                     | **SELECT/UPDATE**: Apenas o próprio usuário (`auth.uid() = id`) <br> **INSERT**: Permitido via signup <br> **DELETE**: Apenas o próprio usuário                                                                                                       |
+| `events`                    | **SELECT**: Apenas eventos do organizador (`auth.uid() = organizer_id`) <br> **INSERT**: Usuário autenticado <br> **UPDATE/DELETE**: Apenas o organizador (`auth.uid() = organizer_id`)                                                               |
+| `participants`              | **SELECT**: Organizador do evento OU participante via token válido <br> **INSERT**: Organizador do evento <br> **UPDATE**: Organizador OU participante (para confirmação de identidade) <br> **DELETE**: Apenas organizador (antes do sorteio - RN05) |
+| `draws`                     | **SELECT**: Apenas organizador do evento <br> **INSERT**: Apenas organizador ao executar sorteio <br> **UPDATE/DELETE**: ❌ Não permitido (imutável após criação - RN05)                                                                               |
+| `draw_results`              | **SELECT**: Apenas o participante envolvido (`giver_participant_id` via token) OU organizador <br> **INSERT**: Sistema (via função segura no backend / RPC) <br> **UPDATE/DELETE**: ❌ Não permitido (RN03, RN05)                                      |
+| `wishlists`                 | **SELECT**: Participante dono OU participante que o tirou <br> **INSERT**: Participante dono <br> **UPDATE**: Participante dono (antes da revelação - RN04) <br> **DELETE**: ❌ Não permitido                                                          |
+| `participant_access_tokens` | **SELECT**: Sistema (validação de token) <br> **INSERT**: Organizador (ao criar participantes) <br> **UPDATE**: ❌ Não permitido <br> **DELETE**: Sistema (expiração/opcional cleanup)                                                                 |
