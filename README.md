@@ -1,7 +1,10 @@
-# 🎁 [Título do Projeto - ex: Tirei Você]
+# 🎁 [Título do Projeto - Hidden Friend]
 
 🔗 **Link em Produção:** https://meu-app-angular.onrender.com
+
 👨‍💻 **Autores:** [Matheus Popolin, Sara Pereira de Almeida]
+
+🎨 **Stitch - Protótipo de UI:** https://stitch.withgoogle.com/projects/2306942198656684083
 
 ## 🎯 1. Visão Geral
 Web app para automatizar sorteios de Amigo Secreto de forma simples e confidencial.
