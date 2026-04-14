@@ -344,3 +344,29 @@ src/app/
 | `draw_results`              | **SELECT**: Apenas o participante envolvido (`giver_participant_id` via token) OU organizador <br> **INSERT**: Sistema (via função segura no backend / RPC) <br> **UPDATE/DELETE**: ❌ Não permitido (RN03, RN05)                                      |
 | `wishlists`                 | **SELECT**: Participante dono OU participante que o tirou <br> **INSERT**: Participante dono <br> **UPDATE**: Participante dono (antes da revelação - RN04) <br> **DELETE**: ❌ Não permitido                                                          |
 | `participant_access_tokens` | **SELECT**: Sistema (validação de token) <br> **INSERT**: Organizador (ao criar participantes) <br> **UPDATE**: ❌ Não permitido <br> **DELETE**: Sistema (expiração/opcional cleanup)                                                                 |
+
+
+## 🛡️ 7. Design Tokens (Variáveis CSS Base)
+# Color Palette
+Our color palette is designed to be clear and accessible in a **dark** interface.
+ 
+*   **Primary Color:** `#6D28D9` (A vibrant purple, used for primary actions and key brand elements.)
+*   **Secondary Color:** `#10B981` (A bright green, complementing the primary for secondary actions and highlights.)
+*   **Neutral Color:** `#0F172A` (A very dark blue, serving as the base for backgrounds and text in dark mode.)
+ 
+# Typography
+Our typographic system utilizes the 'Inter' font family across all major text roles, ensuring consistency and readability.
+ 
+*   **Headline Font:** Inter
+*   **Body Font:** Inter
+*   **Label Font:** Inter
+ 
+# Shape and Form
+The system adopts a moderate approach to corner rounding.
+ 
+*   **Roundedness:** `2` (Moderate rounding, providing a friendly yet modern aesthetic.)
+ 
+# Spacing
+The layout density is set to a normal level, balancing information display with adequate whitespace.
+ 
+*   **Spacing:** `2` (Normal spacing, providing a comfortable visual rhythm.)
