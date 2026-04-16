@@ -4,7 +4,9 @@
 
 👨‍💻 **Autores:** [Matheus Popolin, Sara Pereira de Almeida]
 
-🎨 **Stitch - Protótipo de UI:** https://stitch.withgoogle.com/projects/2306942198656684083
+🎨 **Stitch** https://stitch.withgoogle.com/projects/2306942198656684083
+🎨 **Figma** https://www.figma.com/design/5HCNlszRurdjCalkvJyaIP/Hidden-Friend?node-id=0-1&t=OBefHG52i3h2c8TL-1
+
 
 ## 🎯 1. Visão Geral
 Web app para automatizar sorteios de Amigo Secreto de forma simples e confidencial.
@@ -16,7 +18,7 @@ Toda a especificação do sistema está versionada na pasta `/docs`:
 * ✅ **[Checklist de Avaliação](./docs/checklist.md):** Controle de entrega dos requisitos da disciplina.
 
 ## 🛠 3. Stack Tecnológica
-* **Frontend:** Angular 19 (Standalone, Signals)
+* **Frontend:** Angular 21 (Standalone, Signals)
 * **Estilização:** Tailwind CSS + Spartan UI
 * **Backend (BaaS):** Supabase (PostgreSQL + Auth + RLS)
 
