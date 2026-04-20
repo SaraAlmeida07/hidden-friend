@@ -25,6 +25,41 @@
 * **Estilização & UI:** Tailwind CSS, Spartan UI (HLM), Lucide Angular (Ícones).
 * **Utilitários:** [Ex: date-fns para datas, zod para schemas].
 
+### 🎨 2.1. Decisão de Biblioteca de UI
+
+**Biblioteca escolhida:** Spartan UI (Headless + Tailwind)
+
+**Justificativa da Escolha:**
+
+A equipe optou pelo uso do **Spartan UI** devido à sua abordagem *headless*, que proporciona maior flexibilidade na construção da interface sem impor estilos rígidos ou opinativos.
+
+Essa decisão foi baseada nos seguintes fatores:
+
+- **Flexibilidade de UI/UX**
+  - Permite controle total sobre a experiência visual
+  - Alinha-se diretamente com o requisito de *mobile-first* (US10)
+
+- **Integração com o ecossistema**
+  - Integra-se de forma nativa com o Tailwind CSS
+  - Mantém consistência visual e alta produtividade no desenvolvimento
+
+- **Baixo acoplamento**
+  - Evita dependência de estilos pré-definidos
+  - Diferente de bibliotecas como DaisyUI, que são mais opinionadas
+
+- **Escalabilidade**
+  - Facilita a criação de componentes reutilizáveis
+  - Suporta a arquitetura Angular Standalone de forma limpa e modular
+
+**Impacto Arquitetural:**
+
+A adoção do Spartan UI contribui para uma arquitetura mais:
+- Limpa
+- Customizável
+- Escalável
+
+Além disso, prepara o projeto para a evolução futura de um **Design System próprio**.
+
 ## 🗄️ 3. Arquitetura de Dados
 
 ### 📖 3.1. Glossário Técnico (Mapeamento)
