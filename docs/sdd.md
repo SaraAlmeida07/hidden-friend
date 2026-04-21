@@ -382,26 +382,44 @@ src/app/
 
 
 ## 🛡️ 7. Design Tokens (Variáveis CSS Base)
-# Color Palette
-Our color palette is designed to be clear and accessible in a **dark** interface.
- 
-*   **Primary Color:** `#6D28D9` (A vibrant purple, used for primary actions and key brand elements.)
-*   **Secondary Color:** `#10B981` (A bright green, complementing the primary for secondary actions and highlights.)
-*   **Neutral Color:** `#0F172A` (A very dark blue, serving as the base for backgrounds and text in dark mode.)
- 
-# Typography
-Our typographic system utilizes the 'Inter' font family across all major text roles, ensuring consistency and readability.
- 
-*   **Headline Font:** Inter
-*   **Body Font:** Inter
-*   **Label Font:** Inter
- 
-# Shape and Form
-The system adopts a moderate approach to corner rounding.
- 
-*   **Roundedness:** `2` (Moderate rounding, providing a friendly yet modern aesthetic.)
- 
-# Spacing
-The layout density is set to a normal level, balancing information display with adequate whitespace.
- 
-*   **Spacing:** `2` (Normal spacing, providing a comfortable visual rhythm.)
+
+### 🎨 Paleta de Cores
+
+Nossa paleta de cores foi projetada para ser clara e acessível em uma interface **dark**.
+
+- **Cor Primária:** `#6D28D9`  
+  Um roxo vibrante, utilizado para ações principais e elementos centrais da marca.
+
+- **Cor Secundária:** `#10B981`  
+  Um verde brilhante, complementar à cor primária, utilizado para ações secundárias e destaques.
+
+- **Cor Neutra:** `#0F172A`  
+  Um azul muito escuro, utilizado como base para fundos e textos no modo escuro.
+
+---
+
+### 🔤 Tipografia
+
+Nosso sistema tipográfico utiliza a família de fontes **Inter** em todos os papéis principais de texto, garantindo consistência e legibilidade.
+
+- **Fonte de Títulos (Headline):** Inter  
+- **Fonte de Corpo (Body):** Inter  
+- **Fonte de Rótulos (Label):** Inter  
+
+---
+
+### 🔲 Forma e Aparência
+
+O sistema adota uma abordagem moderada para o arredondamento dos elementos.
+
+- **Arredondamento (Roundedness):** `2`  
+  Arredondamento moderado, proporcionando uma estética amigável e moderna.
+
+---
+
+### 📏 Espaçamento
+
+A densidade do layout é configurada para um nível normal, equilibrando a exibição de informações com espaços em branco adequados.
+
+- **Espaçamento (Spacing):** `2`  
+  Espaçamento normal, garantindo um ritmo visual confortável.
