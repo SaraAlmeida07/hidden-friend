@@ -204,101 +204,12 @@ export interface ParticipantAccessToken {
 
 ## 🏗️ 5. Scaffolding Macro (Arquitetura Frontend)
 
-### 📂 5.1. Estrutura de Pastas Base
+### 📂 5.1. Estrutura de Pastas Global (Workspace)
+O projeto utiliza uma estrutura de Monorepo para separar a documentação, o backend (futuro) e o frontend.
 
-```bash
-src/app/
-
-├── core/
-│   ├── services/
-│   │   ├── auth.service.ts
-│   │   ├── event.service.ts
-│   │   ├── participant.service.ts
-│   │   ├── draw.service.ts
-│   │   └── wishlist.service.ts
-│   │
-│   ├── guards/
-│   │   ├── auth.guard.ts
-│   │   └── event-access.guard.ts
-│   │
-│   ├── interceptors/
-│   │   └── auth.interceptor.ts
-│   │
-│   ├── models/
-│   │   └── (interfaces globais ou adapters temporários até seção 4)
-│   │
-│   └── utils/
-│       ├── token.util.ts
-│       └── validation.util.ts
-│
-├── features/
-│   ├── auth/
-│   │   ├── login/
-│   │   │   └── login.page.ts
-│   │   └── register/
-│   │       └── register.page.ts
-│   │
-│   ├── events/
-│   │   ├── event-create/
-│   │   │   └── event-create.page.ts
-│   │   ├── event-list/
-│   │   │   └── event-list.page.ts
-│   │   ├── event-detail/
-│   │   │   └── event-detail.page.ts
-│   │   └── event-manage/
-│   │       └── event-manage.page.ts
-│   │
-│   ├── participants/
-│   │   ├── participant-add/
-│   │   │   └── participant-add.page.ts
-│   │   └── participant-list/
-│   │       └── participant-list.page.ts
-│   │
-│   ├── draw/
-│   │   ├── draw-execute/
-│   │   │   └── draw-execute.page.ts
-│   │   └── draw-result/
-│   │       └── draw-result.page.ts
-│   │
-│   ├── wishlist/
-│   │   └── wishlist-form/
-│   │       └── wishlist-form.page.ts
-│   │
-│   └── public/
-│       ├── access/
-│       │   └── access.page.ts
-│       ├── confirm-identity/
-│       │   └── confirm-identity.page.ts
-│       └── reveal/
-│           └── reveal.page.ts
-│
-├── shared/
-│   ├── components/
-│   │   ├── ui/
-│   │   │   ├── button/
-│   │   │   ├── input/
-│   │   │   ├── card/
-│   │   │   └── modal/
-│   │   │
-│   │   ├── layout/
-│   │   │   ├── header/
-│   │   │   ├── container/
-│   │   │   └── page-wrapper/
-│   │   │
-│   │   └── feedback/
-│   │       ├── loading-spinner/
-│   │       ├── empty-state/
-│   │       └── error-message/
-│   │
-│   ├── directives/
-│   │   └── (ex: autofocus.directive.ts)
-│   │
-│   ├── pipes/
-│   │   └── (ex: currency-format.pipe.ts)
-│   │
-│   └── constants/
-```
-
+* **`docs/`**: Documentação oficial do projeto (PRD, SDD, manuais).
+* **`apps/api/`**: Reservado para o Backend/Servidor (Node/Supabase Edge Functions).
+* **`apps/web/`**: Aplicação Frontend principal (Angular + Tailwind).
 ---
 
 ### 🚦 5.2. Mapa de Rotas e Páginas (Features)
