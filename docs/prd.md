@@ -112,6 +112,6 @@ A arquitetura do sistema será baseada nas seguintes diretrizes obrigatórias:
 
 * **Frontend:** Angular 21+ (Arquitetura Standalone & Signals)
 * **Backend & Autenticação:** Supabase (PostgreSQL + Row Level Security)
-* **Estilização:** Tailwind CSS + UI Components (ex: Spartan)
+* **Estilização:** Tailwind CSS + UI Components (Spartan)
 * **Hospedagem:** Render.com / Vercel
 * **Controle de Versão**: Git/GitHub utilizando a metodologia Gitflow (branches main, develop e feature/[nome-da-feature]).
