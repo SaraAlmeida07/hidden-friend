@@ -1,4 +1,4 @@
-# 🎁 [Título do Projeto - Hidden Friend]
+# 🎁 Hidden Friend
 
 🔗 **Link em Produção:** https://meu-app-angular.onrender.com
 
@@ -23,8 +23,17 @@ Toda a especificação do sistema está versionada na pasta `/docs`:
 * **Backend (BaaS):** Supabase (PostgreSQL + Auth + RLS)
 
 ## 🚀 4. Quick Start (Como Executar)
-# Instalar as dependências
+
+Siga os passos abaixo para rodar o projeto localmente:
+
+### 1. Preparação Inicial
+Certifique-se de ter o [Node.js](https://nodejs.org/) instalado. Em seguida, execute os comandos na raiz do projeto:
+
+```bash
+# Instalar dependências
 npm install
 
 # Rodar o servidor de desenvolvimento
-ng serve
+npm run dev:web
+```
+Acesse em: **[http://localhost:4200](http://localhost:4200)**
