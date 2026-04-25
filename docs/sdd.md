@@ -310,7 +310,7 @@ Our typographic system utilizes the 'Inter' font family across all major text ro
 # Shape and Form
 The system adopts a moderate approach to corner rounding.
  
-*   **Roundedness:** `2` (Moderate rounding, providing a friendly yet modern aesthetic.)
+*   **Roundedness:** `Full` (Pill-shaped rounding, providing a friendly and modern aesthetic across all interactive elements.)
  
 # Spacing
 The layout density is set to a normal level, balancing information display with adequate whitespace.
