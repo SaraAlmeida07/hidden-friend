@@ -5,6 +5,7 @@
 👨‍💻 **Autores:** [Matheus Popolin, Sara Pereira de Almeida]
 
 🎨 **Stitch** https://stitch.withgoogle.com/projects/2306942198656684083
+
 🎨 **Figma** https://www.figma.com/design/5HCNlszRurdjCalkvJyaIP/Hidden-Friend?node-id=0-1&t=OBefHG52i3h2c8TL-1
 
 
