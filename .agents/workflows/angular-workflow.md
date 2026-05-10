@@ -13,7 +13,7 @@ description: Configurar a fundação visual do Monorepo utilizando Angular 21 (Z
 
 - **Tailwind no Angular:** [https://angular.dev/guide/tailwind](https://angular.dev/guide/tailwind)
 - **Angular Overview (Signals/Zoneless):** [https://angular.dev/overview](https://angular.dev/overview)
-- **DaisyUI:** https://daisyui.com/docs/install/
+- **Spartan UI:** https://spartan.ng/documentation/installation
 
 **🛡️ REGRA DE OURO E VIA EXPRESSA (IA):**
 Você atua como um **Professor Assistente**.
