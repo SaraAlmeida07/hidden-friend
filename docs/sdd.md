@@ -1,68 +1,65 @@
 # 🛠️ Software Design Document (SDD)
 
-**Projeto:** [Hidden Friend]  
-**Versão:** 1.0.0  
-**Status:** ⚪ Aguardando Geração de Especificações.
+**Projeto:** Hidden Friend  
+**Versão:** 2.0.0  
+**Status:** 🟢 Pronto para Implementação
 
 ---
 
-## 🤖 1. Orquestração e Contexto de IA (MCP)
+## 🏗️ 1. Arquitetura do Sistema (Monorepo)
 
-> Configuração dos servidores Model Context Protocol para a IDE Agêntica.
+O projeto segue arquitetura **Monorepo**, separando responsabilidades:
 
-- **Figma MCP:** `[LINK DO ARQUIVO FIGMA]` (Ler design tokens, cores e hierarquia visual)
-- **Supabase MCP:** Contexto do banco de dados real e políticas de RLS
-- **GitHub MCP:** Leitura das Issues do Kanban para orientar a implementação (Spec-Driven)
+- **`docs/`** → Documentação oficial (PRD, SDD)
+- **`apps/web/`** → Frontend Angular (Principal)
+- **`apps/api/`** → Backend (Supabase / Edge Functions)
 
 ---
 
-## 📦 2. Stack Tecnológica e Bibliotecas
+## 🤖 2. Orquestração e Contexto de IA (MCP)
 
-> Definição estrita das tecnologias permitidas (package.json). Nenhuma dependência externa deve ser instalada sem refletir aqui.
+> A IA DEVE consultar estes contextos antes de decisões estruturais
 
-* **Core:** Angular 21+ (Standalone / Signals).
-* **BaaS & Auth:** Supabase-js.
-* **Estilização & UI:** Tailwind CSS, Spartan UI (HLM), Lucide Angular (Ícones).
-* **Utilitários:** [Ex: date-fns para datas, zod para schemas].
+- **Figma MCP:** Fonte de design system
+- **Supabase MCP:** Fonte da verdade do banco + RLS
+- **GitHub MCP:** Fonte das User Stories e progresso
 
-### 🎨 2.1. Decisão de Biblioteca de UI
+---
 
-**Biblioteca escolhida:** Spartan UI (Headless + Tailwind)
+## 📦 3. Stack Tecnológica e Bibliotecas
 
-**Justificativa da Escolha:**
+### Core
 
-A equipe optou pelo uso do **Spartan UI** devido à sua abordagem *headless*, que proporciona maior flexibilidade na construção da interface sem impor estilos rígidos ou opinativos.
+- **Frontend:** Angular 20+ (Standalone + Signals obrigatório)
+- **Backend:** Supabase (PostgreSQL + RLS)
+- **Styling:** Tailwind CSS v4 (CSS-first)
+- **UI:** Spartan UI (Headless)
+- **Ícones:** Lucide Angular
 
-Essa decisão foi baseada nos seguintes fatores:
+### Regras obrigatórias
 
-- **Flexibilidade de UI/UX**
-  - Permite controle total sobre a experiência visual
-  - Alinha-se diretamente com o requisito de *mobile-first* (US10)
+- ❌ Proibido NgModules
+- ❌ Proibido CSS global não controlado
+- ❌ Proibido estado global fora de Signals/Store
 
-- **Integração com o ecossistema**
-  - Integra-se de forma nativa com o Tailwind CSS
-  - Mantém consistência visual e alta produtividade no desenvolvimento
+---
 
-- **Baixo acoplamento**
-  - Evita dependência de estilos pré-definidos
-  - Diferente de bibliotecas como DaisyUI, que são mais opinionadas
+## 🎨 3.1 Decisão de UI
 
-- **Escalabilidade**
-  - Facilita a criação de componentes reutilizáveis
-  - Suporta a arquitetura Angular Standalone de forma limpa e modular
+**Escolha:** Spartan UI
 
-**Impacto Arquitetural:**
+Motivos:
 
-A adoção do Spartan UI contribui para uma arquitetura mais:
-- Limpa
-- Customizável
-- Escalável
+- Headless → controle total
+- Mobile-first
+- Baixo acoplamento
+- Escalável para Design System próprio
 
-Além disso, prepara o projeto para a evolução futura de um **Design System próprio**.
+---
 
-## 🗄️ 3. Arquitetura de Dados
+## 🗄️ 4. Arquitetura de Dados
 
-### 📖 3.1. Glossário Técnico (Mapeamento)
+### 📖 4.1 Glossário Técnico
 
 | Termo PRD (PT-BR)        | Entidade Técnica (EN - snake_case) | Atributos Principais                                                               |
 | :----------------------- | :--------------------------------- | :--------------------------------------------------------------------------------- |
@@ -77,7 +74,7 @@ Além disso, prepara o projeto para a evolução futura de um **Design System pr
 
 ---
 
-### 📊 3.2. Diagrama ER (Mermaid)
+### 📊 4.2 Diagrama ER
 
 ```mermaid
 erDiagram
@@ -148,13 +145,13 @@ erDiagram
     participants ||--o{ draw_results : giver
     participants ||--o{ draw_results : receiver
     participants ||--o{ participant_access_tokens : has
-````
+```
 
 ---
 
-## 📑 4. Contratos Globais (Interfaces & Types)
+## 📑 5. Contratos Globais
 
-📁 **Localização:** `src/app/core/models/`
+📁 `src/app/core/models/`
 
 ```ts
 // user.model.ts
@@ -237,82 +234,83 @@ export interface ParticipantAccessToken {
 
 ---
 
-## 🏗️ 5. Scaffolding Macro (Arquitetura Frontend)
+## 🏗️ 6. Scaffolding
 
-### 📂 5.1. Estrutura de Pastas Global (Workspace)
-O projeto utiliza uma estrutura de Monorepo para separar a documentação, o backend (futuro) e o frontend.
+### 📂 Estrutura
 
-* **`docs/`**: Documentação oficial do projeto (PRD, SDD, manuais).
-* **`apps/api/`**: Reservado para o Backend/Servidor (Node/Supabase Edge Functions).
-* **`apps/web/`**: Aplicação Frontend principal (Angular + Tailwind).
----
+```
+src/app/
+├── core/
+├── shared/
+├── features/
+```
 
-### 🚦 5.2. Mapa de Rotas e Páginas (Features)
+### 📦 Features
 
-| Rota                                | Page Component                                                    | Guard                   |
-| :---------------------------------- | :---------------------------------------------------------------- | :---------------------- |
-| `/login`                            | `features/auth/login/login.page.ts`                               | Público                 |
-| `/register`                         | `features/auth/register/register.page.ts`                         | Público                 |
-| `/events`                           | `features/events/event-list/event-list.page.ts`                   | `auth.guard.ts`         |
-| `/events/create`                    | `features/events/event-create/event-create.page.ts`               | `auth.guard.ts`         |
-| `/events/:eventId`                  | `features/events/event-detail/event-detail.page.ts`               | `auth.guard.ts`         |
-| `/events/:eventId/manage`           | `features/events/event-manage/event-manage.page.ts`               | `auth.guard.ts`         |
-| `/events/:eventId/participants`     | `features/participants/participant-list/participant-list.page.ts` | `auth.guard.ts`         |
-| `/events/:eventId/participants/add` | `features/participants/participant-add/participant-add.page.ts`   | `auth.guard.ts`         |
-| `/events/:eventId/draw`             | `features/draw/draw-execute/draw-execute.page.ts`                 | `auth.guard.ts`         |
-| `/events/:eventId/results`          | `features/draw/draw-result/draw-result.page.ts`                   | `auth.guard.ts`         |
-| `/events/:eventId/wishlist`         | `features/wishlist/wishlist-form/wishlist-form.page.ts`           | `auth.guard.ts`         |
-| `/access/:token`                    | `features/public/access/access.page.ts`                           | Público                 |
-| `/confirm/:token`                   | `features/public/confirm-identity/confirm-identity.page.ts`       | `event-access.guard.ts` |
-| `/reveal/:token`                    | `features/public/reveal/reveal.page.ts`                           | `event-access.guard.ts` |
+- auth
+- events
+- participants
+- draw
+- wishlist
+- public
 
 ---
 
-### 🧠 5.3. Core Services (Singleton)
-| Service              | Arquivo                  | Responsabilidade Macro                                                                         |
-| :------------------- | :----------------------- | :--------------------------------------------------------------------------------------------- |
-| `AuthService`        | `auth.service.ts`        | Gerenciar autenticação com Supabase (login, registro, logout, sessão).                         |
-| `EventService`       | `event.service.ts`       | CRUD de eventos e gestão de status do evento.                                                  |
-| `ParticipantService` | `participant.service.ts` | Gerenciar participantes (adicionar, listar, remover, validar identidade).                      |
-| `DrawService`        | `draw.service.ts`        | Executar o sorteio respeitando as regras de negócio (RN01, RN02, RN05) e persistir resultados. |
-| `WishlistService`    | `wishlist.service.ts`    | Gerenciar lista de desejos dos participantes (criar, atualizar, buscar).                       |
-| `AccessService`      | `access.service.ts`      | Validar tokens de acesso, controlar fluxo de acesso público (US06, US07, RN03, RN04).          |
-| `SupabaseService`    | `supabase.service.ts`    | Instância central do client Supabase e configuração de conexão.                                |
+## 🛡️ 7. Segurança (RLS)
 
-
-## 🛡️ 6. Segurança (Supabase RLS)
 | Tabela                      | Política (RLS)                                                                                                                                                                                                                                        |
 | :-------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `users`                     | **SELECT/UPDATE**: Apenas o próprio usuário (`auth.uid() = id`) <br> **INSERT**: Permitido via signup <br> **DELETE**: Apenas o próprio usuário                                                                                                       |
 | `events`                    | **SELECT**: Apenas eventos do organizador (`auth.uid() = organizer_id`) <br> **INSERT**: Usuário autenticado <br> **UPDATE/DELETE**: Apenas o organizador (`auth.uid() = organizer_id`)                                                               |
 | `participants`              | **SELECT**: Organizador do evento OU participante via token válido <br> **INSERT**: Organizador do evento <br> **UPDATE**: Organizador OU participante (para confirmação de identidade) <br> **DELETE**: Apenas organizador (antes do sorteio - RN05) |
-| `draws`                     | **SELECT**: Apenas organizador do evento <br> **INSERT**: Apenas organizador ao executar sorteio <br> **UPDATE/DELETE**: ❌ Não permitido (imutável após criação - RN05)                                                                               |
-| `draw_results`              | **SELECT**: Apenas o participante envolvido (`giver_participant_id` via token) OU organizador <br> **INSERT**: Sistema (via função segura no backend / RPC) <br> **UPDATE/DELETE**: ❌ Não permitido (RN03, RN05)                                      |
-| `wishlists`                 | **SELECT**: Participante dono OU participante que o tirou <br> **INSERT**: Participante dono <br> **UPDATE**: Participante dono (antes da revelação - RN04) <br> **DELETE**: ❌ Não permitido                                                          |
-| `participant_access_tokens` | **SELECT**: Sistema (validação de token) <br> **INSERT**: Organizador (ao criar participantes) <br> **UPDATE**: ❌ Não permitido <br> **DELETE**: Sistema (expiração/opcional cleanup)                                                                 |
+| `draws`                     | **SELECT**: Apenas organizador do evento <br> **INSERT**: Apenas organizador ao executar sorteio <br> **UPDATE/DELETE**: ❌ Não permitido (imutável após criação - RN05)                                                                              |
+| `draw_results`              | **SELECT**: Apenas o participante envolvido (`giver_participant_id` via token) OU organizador <br> **INSERT**: Sistema (via função segura no backend / RPC) <br> **UPDATE/DELETE**: ❌ Não permitido (RN03, RN05)                                     |
+| `wishlists`                 | **SELECT**: Participante dono OU participante que o tirou <br> **INSERT**: Participante dono <br> **UPDATE**: Participante dono (antes da revelação - RN04) <br> **DELETE**: ❌ Não permitido                                                         |
+| `participant_access_tokens` | **SELECT**: Sistema (validação de token) <br> **INSERT**: Organizador (ao criar participantes) <br> **UPDATE**: ❌ Não permitido <br> **DELETE**: Sistema (expiração/opcional cleanup)                                                                |
 
+---
 
-## 🛡️ 7. Design Tokens (Variáveis CSS Base)
-# Color Palette
-Our color palette is designed to be clear and accessible in a **dark** interface.
- 
-*   **Primary Color:** `#6D28D9` (A vibrant purple, used for primary actions and key brand elements.)
-*   **Secondary Color:** `#10B981` (A bright green, complementing the primary for secondary actions and highlights.)
-*   **Neutral Color:** `#0F172A` (A very dark blue, serving as the base for backgrounds and text in dark mode.)
- 
-# Typography
-Our typographic system utilizes the 'Inter' font family across all major text roles, ensuring consistency and readability.
- 
-*   **Headline Font:** Inter
-*   **Body Font:** Inter
-*   **Label Font:** Inter
- 
-# Shape and Form
-The system adopts a moderate approach to corner rounding.
- 
-*   **Roundedness:** `Full` (Pill-shaped rounding, providing a friendly and modern aesthetic across all interactive elements.)
- 
-# Spacing
-The layout density is set to a normal level, balancing information display with adequate whitespace.
- 
-*   **Spacing:** `2` (Normal spacing, providing a comfortable visual rhythm.)
+## 📡 8. API
+
+- REST padrão
+- plural resources
+- responses consistentes
+
+---
+
+## ⚙️ 9. Environment
+
+- supabaseUrl
+- supabaseKey
+
+---
+
+## 🧩 10. Frontend
+
+- Signals obrigatório
+- Loading states obrigatórios
+
+---
+
+## 🧪 11. Testes
+
+- Testar comportamento real
+- Sem testes vazios
+
+---
+
+## 🎯 12. Regras de Negócio
+
+- Min 3 participantes
+- Sem auto-sorteio
+- Sigilo garantido
+- Sorteio imutável
+
+---
+
+## 🎨 13. Design Tokens
+
+- Primary: #6D28D9
+- Secondary: #10B981
+- Background: #0F172A
+- Font: Inter
