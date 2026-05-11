@@ -1,0 +1,64 @@
+<aside 
+  class="fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] w-64 border-r border-zinc-200/10 bg-zinc-950/95 backdrop-blur-md transition-transform md:translate-x-0 shadow-2xl md:shadow-none"
+  [class.-translate-x-full]="!layoutService.isSidenavOpen()"
+>
+  <div class="h-full overflow-y-auto px-3 py-4">
+    <!-- Close Button (Mobile Only) -->
+    <div class="flex items-center justify-between mb-4 md:hidden">
+      <span class="text-sm font-semibold uppercase tracking-wider text-zinc-500">Menu</span>
+      <button (click)="layoutService.closeSidenav()" class="p-2 text-zinc-400 hover:text-white transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <ul class="space-y-2 font-medium">
+      <li>
+        <a href="#" class="flex items-center rounded-lg p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white group">
+          <svg class="h-5 w-5 transition duration-75 group-hover:text-white" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 21">
+            <path d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-.106l.002.04Z"/>
+            <path d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z"/>
+          </svg>
+          <span class="ms-3">Dashboard</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="flex items-center rounded-lg p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white group">
+          <svg class="h-5 w-5 transition duration-75 group-hover:text-white" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
+            <path d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Z"/>
+          </svg>
+          <span class="ms-3 flex-1 whitespace-nowrap">My Groups</span>
+          <span class="ms-3 inline-flex h-3 w-3 items-center justify-center rounded-full bg-indigo-600 p-3 text-xs font-medium text-white">3</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="flex items-center rounded-lg p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white group">
+          <svg class="h-5 w-5 transition duration-75 group-hover:text-white" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <path d="m17.418 3.623-.018-.008a6.713 6.713 0 0 0-2.4-.569V2h1a1 1 0 1 0 0-2h-2a1 1 0 0 0-1 1v2H9.89V1a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v2H3.89a6.713 6.713 0 0 0-2.4.569l-.018.008a1 1 0 0 0-.6 1.144l.03.17c.452 2.15.573 3.921.573 5.342 0 1.157-.046 2.036-.145 2.651l-.017.11a1 1 0 0 0 .61 1.144l.018.008a6.713 6.713 0 0 0 2.4.569V18h-1a1 1 0 0 0 0 2h2a1 1 0 0 0 1-1v-2h5.11v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2h1a1 1 0 0 0 0-2h-1v-2.11a6.713 6.713 0 0 0 2.4-.569l.018-.008a1 1 0 0 0 .6-1.144l-.03-.17c-.452-2.15-.573-3.921-.573-5.342 0-1.157.046-2.036.145-2.651l.017-.11a1 1 0 0 0-.61-1.144ZM10 11.11H8.89v-2.22H10v2.22Zm2.22-2.22h1.11v2.22h-1.11v-2.22ZM8.89 6.67h1.11v1.11H8.89V6.67Zm3.33 0h1.11v1.11h-1.11V6.67ZM8.89 4.44h1.11v1.11H8.89V4.44Zm3.33 0h1.11v1.11h-1.11V4.44Z"/>
+          </svg>
+          <span class="ms-3 flex-1 whitespace-nowrap">Wishlist</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="mt-8 border-t border-zinc-200/10 pt-4">
+      <ul class="space-y-2 font-medium">
+        <li>
+          <a href="#" class="flex items-center rounded-lg p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white group">
+             <svg class="h-5 w-5 transition duration-75 group-hover:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span class="ms-3">Settings</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</aside>
+
+@if (layoutService.isSidenavOpen()) {
+  <div 
+    class="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm md:hidden"
+    (click)="layoutService.closeSidenav()"
+  ></div>
+}
