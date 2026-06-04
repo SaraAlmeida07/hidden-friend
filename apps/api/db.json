@@ -1,0 +1,173 @@
+{
+  "users": [
+    {
+      "name": "Sara Pereira de Alemida",
+      "email": "sara@email.com",
+      "password_hash": "12345678",
+      "created_at": "2026-06-04T01:48:07.172Z",
+      "id": 1
+    }
+  ],
+  "events": [
+    {
+      "name": "Amigo Secreto ",
+      "date": "2026-07-07",
+      "location": "Casa da família",
+      "suggested_gift_value": 77.77,
+      "organizer_id": 1,
+      "status": "draw_done",
+      "created_at": "2026-06-04T01:56:43.927Z",
+      "id": 1
+    }
+  ],
+  "participants": [
+    {
+      "event_id": 1,
+      "name": "Matheus Popolin",
+      "email": "matheus@email.com",
+      "token": "a46aebe3-8492-43a8-8036-a66a84c020df",
+      "confirmed_at": null,
+      "created_at": "2026-06-04T02:01:16.242Z",
+      "id": 1
+    },
+    {
+      "event_id": 1,
+      "name": "Eduardo Fernandes",
+      "email": "eduardo@email.com",
+      "token": "48db5eef-38b7-4111-bd2a-af454c85d183",
+      "confirmed_at": null,
+      "created_at": "2026-06-04T02:01:36.533Z",
+      "id": 2
+    },
+    {
+      "event_id": 1,
+      "name": "Ana Novak",
+      "email": "novak@email.com",
+      "token": "5865edec-4dbc-46e9-9682-b2bf126063a9",
+      "confirmed_at": null,
+      "created_at": "2026-06-04T02:01:49.190Z",
+      "id": 3
+    }
+  ],
+  "draws": [
+    {
+      "event_id": 1,
+      "performed_at": "2026-06-04T02:01:51.805Z",
+      "id": 1
+    },
+    {
+      "event_id": 1,
+      "performed_at": "2026-06-04T02:02:04.666Z",
+      "id": 2
+    },
+    {
+      "event_id": 1,
+      "performed_at": "2026-06-04T02:02:32.083Z",
+      "id": 3
+    },
+    {
+      "event_id": 1,
+      "performed_at": "2026-06-04T02:02:48.318Z",
+      "id": 4
+    },
+    {
+      "event_id": 1,
+      "performed_at": "2026-06-04T02:04:11.107Z",
+      "id": 5
+    }
+  ],
+  "draw_results": [
+    {
+      "draw_id": 1,
+      "giver_participant_id": 1,
+      "receiver_participant_id": 3,
+      "id": 1
+    },
+    {
+      "draw_id": 1,
+      "giver_participant_id": 3,
+      "receiver_participant_id": 2,
+      "id": 2
+    },
+    {
+      "draw_id": 1,
+      "giver_participant_id": 2,
+      "receiver_participant_id": 1,
+      "id": 3
+    },
+    {
+      "draw_id": 2,
+      "giver_participant_id": 2,
+      "receiver_participant_id": 1,
+      "id": 4
+    },
+    {
+      "draw_id": 2,
+      "giver_participant_id": 3,
+      "receiver_participant_id": 2,
+      "id": 5
+    },
+    {
+      "draw_id": 2,
+      "giver_participant_id": 1,
+      "receiver_participant_id": 3,
+      "id": 6
+    },
+    {
+      "draw_id": 3,
+      "giver_participant_id": 1,
+      "receiver_participant_id": 2,
+      "id": 7
+    },
+    {
+      "draw_id": 3,
+      "giver_participant_id": 3,
+      "receiver_participant_id": 1,
+      "id": 8
+    },
+    {
+      "draw_id": 3,
+      "giver_participant_id": 2,
+      "receiver_participant_id": 3,
+      "id": 9
+    },
+    {
+      "draw_id": 4,
+      "giver_participant_id": 1,
+      "receiver_participant_id": 3,
+      "id": 10
+    },
+    {
+      "draw_id": 4,
+      "giver_participant_id": 2,
+      "receiver_participant_id": 1,
+      "id": 11
+    },
+    {
+      "draw_id": 4,
+      "giver_participant_id": 3,
+      "receiver_participant_id": 2,
+      "id": 12
+    },
+    {
+      "draw_id": 5,
+      "giver_participant_id": 2,
+      "receiver_participant_id": 1,
+      "id": 13
+    },
+    {
+      "draw_id": 5,
+      "giver_participant_id": 1,
+      "receiver_participant_id": 3,
+      "id": 14
+    },
+    {
+      "draw_id": 5,
+      "giver_participant_id": 3,
+      "receiver_participant_id": 2,
+      "id": 15
+    }
+  ],
+  "wishlists": [],
+  "participant_access_tokens": []
+}
