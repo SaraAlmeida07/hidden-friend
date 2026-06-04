@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "format": "prettier --write \"**/*.{ts,js,json,css,scss,md}\"",
-    "dev:api": "echo 'Backend não configurado. Rode o Workflow 2.'",
+    "dev:api": "json-server --watch apps/api/db.json --port 3000",
     "dev:web": "npm run start -w apps/web",
     "build:web": "npm run build -w apps/web",
     "test:web": "npm run test -w apps/web"
@@ -22,6 +22,7 @@
   "author": "Matheus Popolin e Sara Pereira de Almeida",
   "license": "UNLICENSED",
   "devDependencies": {
+    "json-server": "^0.17.4",
     "prettier": "^3.8.3"
   }
 }
