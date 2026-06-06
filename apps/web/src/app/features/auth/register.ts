@@ -4,9 +4,9 @@ import { RouterLink, Router } from '@angular/router';
 import { LucideGift, LucideShieldCheck } from '@lucide/angular';
 import { AuthService } from '../../core/auth/auth.service';
 
-import { HlmButtonDirective } from '@spartan-ng/helm/button';
-import { HlmInputDirective } from '@spartan-ng/helm/input';
-import { HlmLabelDirective } from '@spartan-ng/helm/label';
+import { HlmButton } from '@spartan-ng/helm/button';
+import { HlmInput } from '@spartan-ng/helm/input';
+import { HlmLabel } from '@spartan-ng/helm/label';
 
 @Component({
   selector: 'app-register',
@@ -17,9 +17,9 @@ import { HlmLabelDirective } from '@spartan-ng/helm/label';
     FormsModule,
     LucideGift,
     LucideShieldCheck,
-    HlmButtonDirective,
-    HlmInputDirective,
-    HlmLabelDirective
+    HlmButton,
+    HlmInput,
+    HlmLabel
   ],
   template: `
     <div class="relative min-h-[100dvh] flex items-center justify-center bg-background overflow-hidden p-6">

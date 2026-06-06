@@ -8,29 +8,17 @@ import { BottomNavBarComponent } from './bottom-nav-bar';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet, TopAppBarComponent, BottomNavBarComponent],
+  host: {
+    class: 'flex flex-col min-h-[100dvh] bg-background text-foreground'
+  },
   template: `
     <app-top-app-bar />
 
-    <main class="app-shell__main">
+    <main class="flex-1 overflow-y-auto pb-[73px]">
       <router-outlet />
     </main>
 
     <app-bottom-nav-bar />
-  `,
-  styles: `
-    :host {
-      display: flex;
-      flex-direction: column;
-      min-height: 100dvh;
-      background-color: #0b1326;
-    }
-
-    .app-shell__main {
-      flex: 1;
-      overflow-y: auto;
-      /* Reserve space for fixed BottomNavBar (73px) */
-      padding-bottom: 73px;
-    }
-  `,
+  `
 })
 export class AppShellComponent {}

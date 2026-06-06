@@ -3,66 +3,85 @@ import { RouterLink } from '@angular/router';
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { LucidePlus, LucideCalendarDays, LucideMapPin, LucideDollarSign } from '@lucide/angular';
 import { EventService } from './event.service';
+import { HlmCardImports } from '@spartan-ng/helm/card';
+import { HlmBadge } from '@spartan-ng/helm/badge';
+import { HlmButton } from '@spartan-ng/helm/button';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, DatePipe, CurrencyPipe, LucidePlus, LucideCalendarDays, LucideMapPin, LucideDollarSign],
+  imports: [
+    RouterLink,
+    DatePipe,
+    CurrencyPipe,
+    LucidePlus,
+    LucideCalendarDays,
+    LucideMapPin,
+    LucideDollarSign,
+    ...HlmCardImports,
+    HlmBadge,
+    HlmButton
+  ],
   template: `
-    <div class="dashboard">
-      <div class="dashboard__blur"></div>
+    <div class="relative min-h-[calc(100dvh-133px)] bg-background overflow-hidden">
+      <!-- Decorative blur -->
+      <div class="absolute rounded-full pointer-events-none w-[400px] h-[400px] -top-20 -right-20 bg-primary/10 blur-[80px]"></div>
 
-      <div class="dashboard__content">
+      <div class="relative z-10 max-w-5xl mx-auto px-6 py-12 flex flex-col gap-10">
         <!-- Hero -->
-        <section class="dashboard__hero">
-          <h1 class="dashboard__title">Seus Eventos</h1>
-          <p class="dashboard__subtitle">
+        <section class="flex flex-col gap-4 items-start">
+          <h1 class="text-[44px] font-extrabold text-foreground leading-none m-0 tracking-tight">Seus Eventos</h1>
+          <p class="text-lg text-muted-foreground m-0">
             Gerencie seus sorteios e acompanhe cada grupo.
           </p>
-          <a routerLink="/events/new" class="btn btn--primary">
-            <svg lucidePlus class="btn__icon" aria-hidden="true"></svg>
+          <a routerLink="/events/new" hlmBtn class="w-fit">
+            <svg lucidePlus class="w-5 h-5 mr-2" aria-hidden="true"></svg>
             Novo Evento
           </a>
         </section>
 
         @if (eventService.isLoading()) {
-          <div class="dashboard__loading">
-            <span class="spinner"></span>
+          <div class="flex flex-col items-center justify-center py-16 text-muted-foreground gap-4">
+            <span class="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></span>
             <p>Carregando eventos...</p>
           </div>
         } @else if (eventService.events().length === 0) {
           <!-- Empty state -->
-          <section class="dashboard__empty">
-            <svg lucideCalendarDays class="dashboard__empty-icon" aria-hidden="true"></svg>
-            <h2 class="dashboard__empty-title">Nenhum evento criado ainda</h2>
-            <p class="dashboard__empty-text">
+          <section class="flex flex-col items-center gap-4 py-16 px-6 bg-card border border-dashed border-border rounded-xl text-center">
+            <svg lucideCalendarDays class="w-12 h-12 stroke-muted-foreground/50" aria-hidden="true"></svg>
+            <h2 class="text-lg font-semibold text-foreground m-0">Nenhum evento criado ainda</h2>
+            <p class="text-sm text-muted-foreground m-0 max-w-[300px]">
               Crie seu primeiro amigo secreto e comece a diversão!
             </p>
           </section>
         } @else {
           <!-- Event List -->
-          <section class="dashboard__list">
+          <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @for (event of eventService.events(); track event.id) {
-              <a [routerLink]="['/events', event.id, 'manage']" class="event-card">
-                <div class="event-card__header">
-                  <h3 class="event-card__title">{{ event.name }}</h3>
-                  <span class="badge" [class.badge--success]="event.status === 'draw_done'">
-                    {{ event.status === 'pending' ? 'Sorteio Pendente' : 'Sorteio Realizado' }}
+              <a
+                [routerLink]="['/events', event.id, 'manage']"
+                hlmCard
+                class="hover:border-primary/40 hover:-translate-y-0.5 transition-all p-5 flex flex-col gap-4 text-card-foreground no-underline"
+              >
+                <div class="flex justify-between items-start gap-4">
+                  <h3 hlmCardTitle class="text-lg font-bold text-foreground leading-tight m-0">{{ event.name }}</h3>
+                  <span hlmBadge [variant]="event.status === 'draw_done' ? 'default' : 'secondary'">
+                    {{ event.status === 'pending' ? 'Pendente' : 'Realizado' }}
                   </span>
                 </div>
                 
-                <div class="event-card__details">
-                  <div class="detail-item">
-                    <svg lucideCalendarDays class="detail-icon" aria-hidden="true"></svg>
+                <div class="flex flex-col gap-2.5 mt-auto">
+                  <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <svg lucideCalendarDays class="w-4 h-4 text-primary stroke-current" aria-hidden="true"></svg>
                     <span>{{ event.date | date:'dd/MM/yyyy' }}</span>
                   </div>
-                  <div class="detail-item">
-                    <svg lucideMapPin class="detail-icon" aria-hidden="true"></svg>
+                  <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <svg lucideMapPin class="w-4 h-4 text-primary stroke-current" aria-hidden="true"></svg>
                     <span>{{ event.location }}</span>
                   </div>
-                  <div class="detail-item">
-                    <svg lucideDollarSign class="detail-icon" aria-hidden="true"></svg>
+                  <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <svg lucideDollarSign class="w-4 h-4 text-primary stroke-current" aria-hidden="true"></svg>
                     <span>{{ event.suggested_gift_value | currency:'BRL' }}</span>
                   </div>
                 </div>
@@ -72,219 +91,7 @@ import { EventService } from './event.service';
         }
       </div>
     </div>
-  `,
-  styles: `
-    .dashboard {
-      position: relative;
-      min-height: calc(100dvh - 133px);
-      background-color: #0b1326;
-      overflow: hidden;
-    }
-
-    .dashboard__blur {
-      position: absolute;
-      width: 400px;
-      height: 400px;
-      top: -100px;
-      right: -100px;
-      background: rgba(109, 40, 217, 0.1);
-      filter: blur(80px);
-      border-radius: 9999px;
-      pointer-events: none;
-    }
-
-    .dashboard__content {
-      position: relative;
-      z-index: 1;
-      padding: 48px 24px 32px;
-      display: flex;
-      flex-direction: column;
-      gap: 40px;
-    }
-
-    .dashboard__hero {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .dashboard__title {
-      font-size: 44px;
-      font-weight: 800;
-      color: #dae2fd;
-      line-height: 55px;
-      margin: 0;
-    }
-
-    .dashboard__subtitle {
-      font-size: 18px;
-      color: #ccc3d7;
-      line-height: 29px;
-      margin: 0;
-    }
-
-    .dashboard__empty {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      padding: 48px 24px;
-      background-color: #131b2e;
-      border: 1px dashed rgba(74, 68, 85, 0.4);
-      border-radius: 12px;
-      text-align: center;
-    }
-
-    .dashboard__empty-icon {
-      width: 48px;
-      height: 48px;
-      stroke: #4a4455;
-    }
-
-    .dashboard__empty-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: #94a3b8;
-      margin: 0;
-    }
-
-    .dashboard__empty-text {
-      font-size: 14px;
-      color: #4a4455;
-      margin: 0;
-    }
-
-    .dashboard__loading {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      padding: 48px 24px;
-      color: #94a3b8;
-    }
-
-    .spinner {
-      width: 24px;
-      height: 24px;
-      border: 2px solid rgba(109, 40, 217, 0.3);
-      border-top-color: #6d28d9;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .dashboard__list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .event-card {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      background-color: #060e20;
-      border: 1px solid rgba(74, 68, 85, 0.15);
-      border-radius: 12px;
-      padding: 20px;
-      text-decoration: none;
-      transition: transform 0.2s, border-color 0.2s;
-    }
-
-    .event-card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(109, 40, 217, 0.4);
-    }
-
-    .event-card__header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 16px;
-    }
-
-    .event-card__title {
-      font-size: 20px;
-      font-weight: 700;
-      color: #dae2fd;
-      margin: 0;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 12px;
-      background-color: rgba(148, 163, 184, 0.1);
-      border-radius: 9999px;
-      font-size: 11px;
-      font-weight: 600;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .badge--success {
-      background-color: rgba(0, 165, 114, 0.1);
-      color: #00a572;
-    }
-
-    .event-card__details {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .detail-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #ccc3d7;
-      font-size: 14px;
-    }
-
-    .detail-icon {
-      width: 16px;
-      height: 16px;
-      stroke: #6d28d9;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      height: 56px;
-      padding: 0 32px;
-      border-radius: 9999px;
-      border: none;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      font-size: 16px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: transform 0.1s, opacity 0.2s;
-    }
-
-    .btn:active {
-      transform: scale(0.98);
-    }
-
-    .btn--primary {
-      background: linear-gradient(171deg, #5300b7 0%, #6d28d9 100%);
-      color: #ffffff;
-      box-shadow: 0px 8px 32px rgba(83, 0, 183, 0.2);
-      width: fit-content;
-    }
-
-    .btn__icon {
-      width: 20px;
-      height: 20px;
-      stroke: currentColor;
-    }
-  `,
+  `
 })
 export class DashboardComponent implements OnInit {
   protected eventService = inject(EventService);
