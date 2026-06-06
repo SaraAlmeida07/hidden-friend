@@ -8,75 +8,28 @@ import { LucideCalendarDays, LucideUserCircle } from '@lucide/angular';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterLinkActive, LucideCalendarDays, LucideUserCircle],
   template: `
-    <nav class="bottom-nav">
+    <nav class="fixed bottom-0 left-0 right-0 z-50 h-[73px] flex items-center justify-around bg-background/80 border-t border-border/40 shadow-[0_-4px_32px_0_rgba(109,40,217,0.06)] backdrop-blur-md">
       <a
         routerLink="/events"
-        routerLinkActive="bottom-nav__link--active"
-        class="bottom-nav__link"
+        routerLinkActive="text-primary"
+        [routerLinkActiveOptions]="{ exact: false }"
+        class="flex flex-col items-center justify-center gap-1 px-6 py-2 no-underline text-muted-foreground transition-colors hover:text-foreground"
         aria-label="Eventos"
       >
-        <svg lucideCalendarDays class="bottom-nav__icon" aria-hidden="true"></svg>
-        <span class="bottom-nav__label">Events</span>
+        <svg lucideCalendarDays class="w-5 h-5 stroke-current" aria-hidden="true"></svg>
+        <span class="font-medium text-[11px] leading-tight">Eventos</span>
       </a>
 
       <a
         routerLink="/profile"
-        routerLinkActive="bottom-nav__link--active"
-        class="bottom-nav__link"
+        routerLinkActive="text-primary"
+        class="flex flex-col items-center justify-center gap-1 px-6 py-2 no-underline text-muted-foreground transition-colors hover:text-foreground"
         aria-label="Perfil"
       >
-        <svg lucideUserCircle class="bottom-nav__icon" aria-hidden="true"></svg>
-        <span class="bottom-nav__label">Profile</span>
+        <svg lucideUserCircle class="w-5 h-5 stroke-current" aria-hidden="true"></svg>
+        <span class="font-medium text-[11px] leading-tight">Perfil</span>
       </a>
     </nav>
-  `,
-  styles: `
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 50;
-      height: 73px;
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      background-color: rgba(2, 6, 23, 0.8);
-      border-top: 1px solid rgba(204, 195, 215, 0.15);
-      box-shadow: 0px -4px 32px 0px rgba(83, 0, 183, 0.06);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-    }
-
-    .bottom-nav__link {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      padding: 8px 24px;
-      text-decoration: none;
-      color: #94a3b8;
-      border-radius: 8px;
-      transition: color 0.2s;
-    }
-
-    .bottom-nav__link--active {
-      color: #6d28d9;
-    }
-
-    .bottom-nav__icon {
-      width: 20px;
-      height: 20px;
-      stroke: currentColor;
-    }
-
-    .bottom-nav__label {
-      font-family: 'Inter', sans-serif;
-      font-size: 11px;
-      font-weight: 500;
-      line-height: 17px;
-    }
-  `,
+  `
 })
 export class BottomNavBarComponent {}
