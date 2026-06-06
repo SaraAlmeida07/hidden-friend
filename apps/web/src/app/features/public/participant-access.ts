@@ -1,49 +1,66 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { LucideCalendarDays, LucideMapPin, LucideDollarSign, LucideGift, LucideUserCheck } from '@lucide/angular';
 import { PublicService } from './public.service';
 import { Participant } from '../../core/models/participant.model';
 import { Event } from '../../core/models/event.model';
 import { forkJoin, switchMap } from 'rxjs';
+import { HlmBadge } from '@spartan-ng/helm/badge';
+import { HlmButton } from '@spartan-ng/helm/button';
+import { HlmInput } from '@spartan-ng/helm/input';
+import { HlmLabel } from '@spartan-ng/helm/label';
 
 @Component({
   selector: 'app-participant-access',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, DatePipe, CurrencyPipe, LucideCalendarDays, LucideMapPin, LucideDollarSign, LucideGift, LucideUserCheck],
+  imports: [
+    ReactiveFormsModule,
+    DatePipe,
+    CurrencyPipe,
+    LucideCalendarDays,
+    LucideMapPin,
+    LucideDollarSign,
+    LucideGift,
+    LucideUserCheck,
+    HlmBadge,
+    HlmButton,
+    HlmInput,
+    HlmLabel
+  ],
   template: `
-    <div class="public-access">
-      <div class="public-access__blur"></div>
+    <div class="relative min-h-dvh bg-background overflow-hidden flex flex-col">
+      <div class="absolute rounded-full pointer-events-none w-[400px] h-[400px] -top-20 -left-20 bg-primary/15 blur-[80px]"></div>
 
       @if (isLoading()) {
-        <div class="loading-state">
-          <span class="spinner"></span>
+        <div class="flex flex-col items-center justify-center flex-1 gap-4 text-muted-foreground">
+          <span class="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin"></span>
           <p>Carregando convite...</p>
         </div>
       } @else if (error()) {
-        <div class="error-state">
+        <div class="flex flex-col items-center justify-center flex-1 gap-4 text-muted-foreground">
           <p>{{ error() }}</p>
         </div>
       } @else if (participant() && event()) {
-        <div class="public-access__content">
+        <div class="relative z-10 max-w-md mx-auto px-6 py-12 flex flex-col gap-8 w-full">
           <!-- Section 1: Event Info -->
-          <header class="event-info">
-            <span class="badge badge--active">Convite Ativo</span>
-            <h1 class="event-info__title">{{ event()!.name }}</h1>
+          <header class="flex flex-col items-center text-center gap-4">
+            <span hlmBadge variant="outline" class="border-primary/30 text-foreground bg-primary/10">Convite Ativo</span>
+            <h1 class="text-3xl font-extrabold text-foreground leading-tight m-0 tracking-tight">{{ event()!.name }}</h1>
             
-            <div class="event-info__details">
-              <div class="detail-item">
-                <svg lucideCalendarDays class="detail-icon" aria-hidden="true"></svg>
+            <div class="flex flex-col items-center gap-3 mt-2">
+              <div class="flex items-center gap-2 text-muted-foreground text-sm">
+                <svg lucideCalendarDays class="w-4.5 h-4.5 text-primary stroke-current" aria-hidden="true"></svg>
                 <span>{{ event()!.date | date:'dd/MM/yyyy' }}</span>
               </div>
-              <div class="detail-item">
-                <svg lucideMapPin class="detail-icon" aria-hidden="true"></svg>
+              <div class="flex items-center gap-2 text-muted-foreground text-sm">
+                <svg lucideMapPin class="w-4.5 h-4.5 text-primary stroke-current" aria-hidden="true"></svg>
                 <span>{{ event()!.location }}</span>
               </div>
-              <div class="detail-item">
-                <svg lucideDollarSign class="detail-icon" aria-hidden="true"></svg>
+              <div class="flex items-center gap-2 text-muted-foreground text-sm">
+                <svg lucideDollarSign class="w-4.5 h-4.5 text-primary stroke-current" aria-hidden="true"></svg>
                 <span>{{ event()!.suggested_gift_value | currency:'BRL' }}</span>
               </div>
             </div>
@@ -51,30 +68,30 @@ import { forkJoin, switchMap } from 'rxjs';
 
           @if (step() === 'auth') {
             <!-- Section 2: Authentication -->
-            <section class="auth-card">
-              <h2 class="auth-card__title">Confirme sua Identidade</h2>
-              <p class="auth-card__subtitle">Para acessar o sorteio, precisamos confirmar que é você mesmo(a).</p>
+            <section class="bg-card border border-border/80 rounded-2xl p-6 flex flex-col gap-5">
+              <h2 class="text-xl font-bold text-foreground m-0 text-center tracking-tight">Confirme sua Identidade</h2>
+              <p class="text-xs text-muted-foreground m-0 text-center leading-relaxed">Para acessar o sorteio, precisamos confirmar que é você mesmo(a).</p>
 
-              <form [formGroup]="authForm" (ngSubmit)="onConfirmIdentity()" class="auth-card__form">
-                <div class="form-field">
-                  <label>Seu Nome (como o organizador digitou)</label>
-                  <input type="text" class="form-field__input" formControlName="name" placeholder="Ex: Ana Silva" />
+              <form [formGroup]="authForm" (ngSubmit)="onConfirmIdentity()" class="flex flex-col gap-4">
+                <div class="flex flex-col gap-2">
+                  <label hlmLabel for="auth-name">Seu Nome (como o organizador digitou)</label>
+                  <input hlmInput id="auth-name" type="text" class="w-full" formControlName="name" placeholder="Ex: Ana Silva" />
                 </div>
-                <div class="form-field">
-                  <label>Seu E-mail</label>
-                  <input type="email" class="form-field__input" formControlName="email" placeholder="Ex: ana@email.com" />
+                <div class="flex flex-col gap-2">
+                  <label hlmLabel for="auth-email">Seu E-mail</label>
+                  <input hlmInput id="auth-email" type="email" class="w-full" formControlName="email" placeholder="Ex: ana@email.com" />
                 </div>
 
                 @if (authError()) {
-                  <p class="error-text">{{ authError() }}</p>
+                  <p class="text-xs text-destructive text-center m-0">{{ authError() }}</p>
                 }
 
-                <div class="auth-card__actions">
-                  <button type="submit" class="btn btn--primary" [disabled]="authForm.invalid || isVerifying()">
+                <div class="flex flex-col gap-3 mt-2">
+                  <button hlmBtn type="submit" variant="outline" class="w-full h-12 border-primary/20 bg-primary/10 hover:bg-primary/25 text-foreground" [disabled]="authForm.invalid || isVerifying()">
                     @if (isVerifying()) {
-                      <span class="btn__spinner"></span>
+                      <span class="w-5 h-5 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin"></span>
                     } @else {
-                      <svg lucideUserCheck class="btn__icon" aria-hidden="true"></svg>
+                      <svg lucideUserCheck class="w-5 h-5 mr-2" aria-hidden="true"></svg>
                       Confirmar Identidade
                     }
                   </button>
@@ -83,313 +100,41 @@ import { forkJoin, switchMap } from 'rxjs';
             </section>
           } @else if (step() === 'wishlist') {
             <!-- Section 3: Wishlist -->
-            <section class="wishlist-card">
-              <h2 class="wishlist-card__title">Sua Lista de Desejos</h2>
-              <p class="wishlist-card__subtitle">Dê 3 sugestões de presentes para ajudar quem tirar você!</p>
+            <section class="bg-card border border-border/80 rounded-2xl p-6 flex flex-col gap-5">
+              <h2 class="text-xl font-bold text-foreground m-0 text-center tracking-tight">Sua Lista de Desejos</h2>
+              <p class="text-xs text-muted-foreground m-0 text-center leading-relaxed">Dê 3 sugestões de presentes para ajudar quem tirar você!</p>
 
-              <form [formGroup]="wishlistForm" (ngSubmit)="onSaveWishlist()" class="wishlist-card__form">
-                <div class="form-field form-field--numbered">
-                  <span class="number-badge">1</span>
-                  <input type="text" class="form-field__input" formControlName="wish_1" placeholder="Sugestão de presente 1..." />
+              <form [formGroup]="wishlistForm" (ngSubmit)="onSaveWishlist()" class="flex flex-col gap-4">
+                <div class="flex flex-row items-center gap-3">
+                  <span class="w-8 h-8 flex items-center justify-center bg-primary/25 text-foreground rounded-full font-bold text-sm shrink-0">1</span>
+                  <input hlmInput type="text" class="w-full" formControlName="wish_1" placeholder="Sugestão de presente 1..." />
                 </div>
-                <div class="form-field form-field--numbered">
-                  <span class="number-badge">2</span>
-                  <input type="text" class="form-field__input" formControlName="wish_2" placeholder="Sugestão de presente 2..." />
+                <div class="flex flex-row items-center gap-3">
+                  <span class="w-8 h-8 flex items-center justify-center bg-primary/25 text-foreground rounded-full font-bold text-sm shrink-0">2</span>
+                  <input hlmInput type="text" class="w-full" formControlName="wish_2" placeholder="Sugestão de presente 2..." />
                 </div>
-                <div class="form-field form-field--numbered">
-                  <span class="number-badge">3</span>
-                  <input type="text" class="form-field__input" formControlName="wish_3" placeholder="Sugestão de presente 3..." />
+                <div class="flex flex-row items-center gap-3">
+                  <span class="w-8 h-8 flex items-center justify-center bg-primary/25 text-foreground rounded-full font-bold text-sm shrink-0">3</span>
+                  <input hlmInput type="text" class="w-full" formControlName="wish_3" placeholder="Sugestão de presente 3..." />
                 </div>
 
-                <button type="submit" class="btn btn--jewel" [disabled]="wishlistForm.invalid || isSaving()">
+                <button hlmBtn type="submit" class="w-full h-12 mt-4" [disabled]="wishlistForm.invalid || isSaving()">
                   @if (isSaving()) {
-                    <span class="btn__spinner"></span>
+                    <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                   } @else {
-                    <svg lucideGift class="btn__icon" aria-hidden="true"></svg>
+                    <svg lucideGift class="w-5 h-5 mr-2" aria-hidden="true"></svg>
                     Confirmar e Revelar Amigo
                   }
                 </button>
                 
-                <p class="footer-text">Ao participar, você concorda com as regras do grupo de amigo secreto.</p>
+                <p class="text-[10px] text-muted-foreground text-center mt-2 m-0">Ao participar, você concorda com as regras do grupo de amigo secreto.</p>
               </form>
             </section>
           }
         </div>
       }
     </div>
-  `,
-  styles: `
-    .public-access {
-      position: relative;
-      min-height: 100dvh;
-      background-color: #0b1326;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .public-access__blur {
-      position: absolute;
-      width: 400px;
-      height: 400px;
-      top: -100px;
-      left: -100px;
-      background: rgba(109, 40, 217, 0.15);
-      filter: blur(80px);
-      border-radius: 50%;
-      pointer-events: none;
-    }
-
-    .public-access__content {
-      position: relative;
-      z-index: 1;
-      padding: 48px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 32px;
-      max-width: 500px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    .event-info {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: 16px;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 12px;
-      border-radius: 9999px;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .badge--active {
-      background-color: rgba(109, 40, 217, 0.15);
-      border: 1px solid rgba(109, 40, 217, 0.3);
-      color: #dae2fd;
-    }
-
-    .event-info__title {
-      font-size: 32px;
-      font-weight: 800;
-      color: #dae2fd;
-      line-height: 1.2;
-      margin: 0;
-    }
-
-    .event-info__details {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      margin-top: 8px;
-    }
-
-    .detail-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #ccc3d7;
-      font-size: 15px;
-    }
-
-    .detail-icon {
-      width: 18px;
-      height: 18px;
-      stroke: #6d28d9;
-    }
-
-    .auth-card, .wishlist-card {
-      background-color: #131b2e;
-      border: 1px solid rgba(74, 68, 85, 0.3);
-      border-radius: 16px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .auth-card__title, .wishlist-card__title {
-      font-size: 22px;
-      font-weight: 700;
-      color: #dae2fd;
-      margin: 0;
-      text-align: center;
-    }
-
-    .auth-card__subtitle, .wishlist-card__subtitle {
-      font-size: 14px;
-      color: #94a3b8;
-      margin: 0;
-      text-align: center;
-      line-height: 1.5;
-    }
-
-    .auth-card__form, .wishlist-card__form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .form-field {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .form-field label {
-      font-size: 13px;
-      color: #94a3b8;
-      font-weight: 500;
-    }
-
-    .form-field__input {
-      width: 100%;
-      height: 52px;
-      padding: 0 16px;
-      background-color: #060e20;
-      border: 1px solid rgba(74, 68, 85, 0.4);
-      border-radius: 8px;
-      color: #dae2fd;
-      font-family: 'Inter', sans-serif;
-      font-size: 15px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .form-field__input:focus {
-      border-color: #6d28d9;
-    }
-
-    .form-field--numbered {
-      flex-direction: row;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .number-badge {
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(109, 40, 217, 0.2);
-      color: #dae2fd;
-      border-radius: 50%;
-      font-weight: 700;
-      font-size: 14px;
-      flex-shrink: 0;
-    }
-
-    .auth-card__actions {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 8px;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      border-radius: 9999px;
-      border: none;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: transform 0.1s, opacity 0.2s;
-    }
-
-    .btn:active:not(:disabled) {
-      transform: scale(0.98);
-    }
-
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .btn--primary {
-      height: 52px;
-      width: 100%;
-      background: rgba(109, 40, 217, 0.2);
-      color: #dae2fd;
-      border: 1px solid rgba(109, 40, 217, 0.4);
-    }
-
-    .btn--jewel {
-      height: 56px;
-      width: 100%;
-      margin-top: 16px;
-      background: linear-gradient(171deg, #5300b7 0%, #6d28d9 100%);
-      color: #ffffff;
-      font-size: 16px;
-      box-shadow: 0px 8px 32px rgba(83, 0, 183, 0.3);
-    }
-
-    .btn__icon {
-      width: 20px;
-      height: 20px;
-      stroke: currentColor;
-    }
-
-    .btn__spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-top-color: #ffffff;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
-    .error-text {
-      color: #f87171;
-      font-size: 13px;
-      text-align: center;
-      margin: 0;
-    }
-
-    .footer-text {
-      font-size: 12px;
-      color: #4a4455;
-      text-align: center;
-      margin: 8px 0 0 0;
-    }
-
-    .loading-state, .error-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      flex: 1;
-      gap: 16px;
-      color: #94a3b8;
-    }
-
-    .spinner {
-      width: 32px;
-      height: 32px;
-      border: 3px solid rgba(109, 40, 217, 0.3);
-      border-top-color: #6d28d9;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-  `,
+  `
 })
 export class ParticipantAccessComponent implements OnInit {
   private publicService = inject(PublicService);
