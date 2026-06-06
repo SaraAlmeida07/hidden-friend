@@ -1,7 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { User } from '../models/user.model';
-import { Observable, tap, map, catchError, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +14,7 @@ export class AuthService {
   readonly currentUser = this.userSignal.asReadonly();
   readonly isAuthenticated = computed(() => this.userSignal() !== null);
 
-  constructor(private http: HttpClient) {}
+  constructor() {}
 
   private getStoredUser(): User | null {
     const stored = localStorage.getItem('hf_user');
@@ -32,29 +30,44 @@ export class AuthService {
     this.userSignal.set(user);
   }
 
-  login(email: string, password_hash: string): Observable<User | null> {
-    return this.http.get<User[]>(`${this.apiUrl}?email=${email}&password_hash=${password_hash}`).pipe(
-      map(users => users.length > 0 ? users[0] : null),
-      tap(user => {
-        if (user) {
-          this.setStoredUser(user);
-        }
-      }),
-      catchError(() => of(null))
-    );
+  async login(email: string, password_hash: string): Promise<User | null> {
+    try {
+      const response = await fetch(`${this.apiUrl}?email=${encodeURIComponent(email)}&password_hash=${encodeURIComponent(password_hash)}`);
+      if (!response.ok) return null;
+      const users: User[] = await response.json();
+      const user = users.length > 0 ? users[0] : null;
+      if (user) {
+        this.setStoredUser(user);
+      }
+      return user;
+    } catch {
+      return null;
+    }
   }
 
-  register(name: string, email: string, password_hash: string): Observable<User> {
-    const newUser: Partial<User> = {
+  async register(name: string, email: string, password_hash: string): Promise<User> {
+    const newUser = {
       name,
       email,
       password_hash,
       created_at: new Date().toISOString()
     };
     
-    return this.http.post<User>(this.apiUrl, newUser).pipe(
-      tap(user => this.setStoredUser(user))
-    );
+    const response = await fetch(this.apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newUser)
+    });
+    
+    if (!response.ok) {
+      throw new Error('Erro ao registrar usuário');
+    }
+    
+    const user: User = await response.json();
+    this.setStoredUser(user);
+    return user;
   }
 
   logout(): void {

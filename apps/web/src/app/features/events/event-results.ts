@@ -90,28 +90,31 @@ export class EventResultsComponent implements OnInit {
   protected isLoading = signal<boolean>(true);
   protected copiedId = signal<string | null>(null);
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.router.navigate(['/events']);
       return;
     }
 
-    this.eventService.getEventById(id).subscribe({
-      next: (ev) => {
-        if (ev.status !== 'draw_done') {
-          this.router.navigate(['/events', id, 'manage']);
-          return;
-        }
-        this.event.set(ev);
-        this.isLoading.set(false);
-      },
-      error: () => {
-        this.router.navigate(['/events']);
+    try {
+      const ev = await this.eventService.getEventById(id);
+      if (ev.status !== 'draw_done') {
+        this.router.navigate(['/events', id, 'manage']);
+        return;
       }
-    });
+      this.event.set(ev);
+      this.isLoading.set(false);
+    } catch {
+      this.router.navigate(['/events']);
+      return;
+    }
 
-    this.participantService.loadParticipants(id).subscribe();
+    try {
+      await this.participantService.loadParticipants(id);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   protected copyLink(participantId: string, token: string): void {

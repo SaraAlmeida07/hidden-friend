@@ -1,6 +1,4 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, switchMap, map, of, forkJoin, tap } from 'rxjs';
+import { Injectable } from '@angular/core';
 import { Participant } from '../../core/models/participant.model';
 import { Wishlist } from '../../core/models/wishlist.model';
 import { Event } from '../../core/models/event.model';
@@ -10,66 +8,92 @@ import { DrawResult } from '../../core/models/draw.model';
   providedIn: 'root'
 })
 export class PublicService {
-  private http = inject(HttpClient);
-  
   private apiUrlParticipants = 'http://localhost:3000/participants';
   private apiUrlEvents = 'http://localhost:3000/events';
   private apiUrlWishlists = 'http://localhost:3000/wishlists';
   private apiUrlDrawResults = 'http://localhost:3000/draw_results';
 
   // Find participant by token
-  getParticipantByToken(token: string): Observable<Participant | null> {
-    return this.http.get<Participant[]>(`${this.apiUrlParticipants}?token=${token}`).pipe(
-      map(participants => participants.length > 0 ? participants[0] : null)
-    );
+  async getParticipantByToken(token: string): Promise<Participant | null> {
+    const response = await fetch(`${this.apiUrlParticipants}?token=${token}`);
+    if (!response.ok) return null;
+    const participants: Participant[] = await response.json();
+    return participants.length > 0 ? participants[0] : null;
   }
 
-  getEventById(eventId: string): Observable<Event> {
-    return this.http.get<Event>(`${this.apiUrlEvents}/${eventId}`);
+  async getEventById(eventId: string): Promise<Event> {
+    const response = await fetch(`${this.apiUrlEvents}/${eventId}`);
+    if (!response.ok) throw new Error('Failed to get event');
+    return response.json();
   }
 
   // Verify identity (name and email match)
-  verifyIdentity(participantId: string, name: string, email: string): Observable<boolean> {
-    return this.http.get<Participant>(`${this.apiUrlParticipants}/${participantId}`).pipe(
-      map(p => p.name.trim().toLowerCase() === name.trim().toLowerCase() && 
-               p.email.trim().toLowerCase() === email.trim().toLowerCase())
-    );
+  async verifyIdentity(participantId: string, name: string, email: string): Promise<boolean> {
+    const response = await fetch(`${this.apiUrlParticipants}/${participantId}`);
+    if (!response.ok) return false;
+    const p: Participant = await response.json();
+    return p.name.trim().toLowerCase() === name.trim().toLowerCase() && 
+           p.email.trim().toLowerCase() === email.trim().toLowerCase();
   }
 
-  saveWishlist(participantId: string, wishes: { wish_1: string, wish_2: string, wish_3: string }): Observable<Wishlist> {
-    const newWishlist: Partial<Wishlist> = {
+  async saveWishlist(participantId: string, wishes: { wish_1: string, wish_2: string, wish_3: string }): Promise<Wishlist> {
+    const newWishlist = {
       participant_id: participantId,
       ...wishes,
       created_at: new Date().toISOString()
     };
-    return this.http.post<Wishlist>(this.apiUrlWishlists, newWishlist);
+    
+    const response = await fetch(this.apiUrlWishlists, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newWishlist)
+    });
+
+    if (!response.ok) throw new Error('Failed to save wishlist');
+    return response.json();
   }
 
-  markParticipantConfirmed(participantId: string): Observable<Participant> {
-    return this.http.patch<Participant>(`${this.apiUrlParticipants}/${participantId}`, {
-      confirmed_at: new Date().toISOString()
+  async markParticipantConfirmed(participantId: string): Promise<Participant> {
+    const response = await fetch(`${this.apiUrlParticipants}/${participantId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        confirmed_at: new Date().toISOString()
+      })
     });
+
+    if (!response.ok) throw new Error('Failed to confirm participant');
+    return response.json();
   }
 
   // Get who this participant is giving a gift to (the receiver)
-  getDrawReveal(participantId: string): Observable<{ receiver: Participant, wishlist: Wishlist | null } | null> {
+  async getDrawReveal(participantId: string): Promise<{ receiver: Participant, wishlist: Wishlist | null } | null> {
     // 1. Find the draw result where giver_participant_id matches
-    return this.http.get<DrawResult[]>(`${this.apiUrlDrawResults}?giver_participant_id=${participantId}`).pipe(
-      switchMap(results => {
-        if (results.length === 0) return of(null);
-        const receiverId = results[0].receiver_participant_id;
+    const resResults = await fetch(`${this.apiUrlDrawResults}?giver_participant_id=${participantId}`);
+    if (!resResults.ok) return null;
+    const results: DrawResult[] = await resResults.json();
+    if (results.length === 0) return null;
+    
+    const receiverId = results[0].receiver_participant_id;
 
-        // 2. Fetch the receiver's participant info and their wishlist
-        return forkJoin({
-          receiver: this.http.get<Participant>(`${this.apiUrlParticipants}/${receiverId}`),
-          wishlistArr: this.http.get<Wishlist[]>(`${this.apiUrlWishlists}?participant_id=${receiverId}`)
-        }).pipe(
-          map(({ receiver, wishlistArr }) => ({
-            receiver,
-            wishlist: wishlistArr.length > 0 ? wishlistArr[0] : null
-          }))
-        );
-      })
-    );
+    // 2. Fetch the receiver's participant info and their wishlist
+    const [resReceiver, resWishlists] = await Promise.all([
+      fetch(`${this.apiUrlParticipants}/${receiverId}`),
+      fetch(`${this.apiUrlWishlists}?participant_id=${receiverId}`)
+    ]);
+
+    if (!resReceiver.ok || !resWishlists.ok) throw new Error('Failed to fetch draw reveal details');
+
+    const receiver: Participant = await resReceiver.json();
+    const wishlists: Wishlist[] = await resWishlists.json();
+
+    return {
+      receiver,
+      wishlist: wishlists.length > 0 ? wishlists[0] : null
+    };
   }
 }

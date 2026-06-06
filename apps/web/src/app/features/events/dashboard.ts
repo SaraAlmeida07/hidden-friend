@@ -97,6 +97,6 @@ export class DashboardComponent implements OnInit {
   protected eventService = inject(EventService);
 
   ngOnInit(): void {
-    this.eventService.loadEvents().subscribe();
+    this.eventService.loadEvents();
   }
 }

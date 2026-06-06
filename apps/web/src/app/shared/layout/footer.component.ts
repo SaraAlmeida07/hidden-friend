@@ -3,7 +3,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideCalendarDays, LucideUserCircle } from '@lucide/angular';
 
 @Component({
-  selector: 'app-bottom-nav-bar',
+  selector: 'app-footer',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterLinkActive, LucideCalendarDays, LucideUserCircle],
@@ -32,4 +32,4 @@ import { LucideCalendarDays, LucideUserCircle } from '@lucide/angular';
     </nav>
   `
 })
-export class BottomNavBarComponent {}
+export class FooterComponent {}

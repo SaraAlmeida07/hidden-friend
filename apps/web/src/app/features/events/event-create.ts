@@ -133,7 +133,7 @@ export class EventCreateComponent {
     suggested_gift_value: [0, [Validators.required, Validators.min(0)]]
   });
 
-  protected onSubmit(): void {
+  protected async onSubmit(): Promise<void> {
     if (this.form.invalid) return;
 
     this.isLoading = true;
@@ -141,15 +141,13 @@ export class EventCreateComponent {
 
     const eventData = this.form.getRawValue();
 
-    this.eventService.createEvent(eventData).subscribe({
-      next: () => {
-        this.isLoading = false;
-        this.router.navigate(['/events']);
-      },
-      error: () => {
-        this.isLoading = false;
-        this.errorMessage = 'Erro ao criar evento. Tente novamente.';
-      }
-    });
+    try {
+      await this.eventService.createEvent(eventData);
+      this.isLoading = false;
+      this.router.navigate(['/events']);
+    } catch {
+      this.isLoading = false;
+      this.errorMessage = 'Erro ao criar evento. Tente novamente.';
+    }
   }
 }

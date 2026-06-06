@@ -1,28 +1,25 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, signal } from '@angular/core';
 import { Participant } from '../../core/models/participant.model';
-import { Observable, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ParticipantService {
-  private http = inject(HttpClient);
   private apiUrl = 'http://localhost:3000/participants';
 
   private participantsSignal = signal<Participant[]>([]);
   readonly participants = this.participantsSignal.asReadonly();
 
-  loadParticipants(eventId: string): Observable<Participant[]> {
-    return this.http.get<Participant[]>(`${this.apiUrl}?event_id=${eventId}`).pipe(
-      tap(participants => {
-        this.participantsSignal.set(participants);
-      })
-    );
+  async loadParticipants(eventId: string): Promise<Participant[]> {
+    const response = await fetch(`${this.apiUrl}?event_id=${eventId}`);
+    if (!response.ok) throw new Error('Failed to load participants');
+    const participants: Participant[] = await response.json();
+    this.participantsSignal.set(participants);
+    return participants;
   }
 
-  addParticipant(eventId: string, name: string, email: string): Observable<Participant> {
-    const newParticipant: Partial<Participant> = {
+  async addParticipant(eventId: string, name: string, email: string): Promise<Participant> {
+    const newParticipant = {
       event_id: eventId,
       name,
       email,
@@ -31,18 +28,26 @@ export class ParticipantService {
       created_at: new Date().toISOString()
     };
 
-    return this.http.post<Participant>(this.apiUrl, newParticipant).pipe(
-      tap(created => {
-        this.participantsSignal.update(participants => [...participants, created]);
-      })
-    );
+    const response = await fetch(this.apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newParticipant)
+    });
+
+    if (!response.ok) throw new Error('Failed to add participant');
+    const created: Participant = await response.json();
+    this.participantsSignal.update(participants => [...participants, created]);
+    return created;
   }
 
-  removeParticipant(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
-      tap(() => {
-        this.participantsSignal.update(participants => participants.filter(p => p.id !== id));
-      })
-    );
+  async removeParticipant(id: string): Promise<void> {
+    const response = await fetch(`${this.apiUrl}/${id}`, {
+      method: 'DELETE'
+    });
+
+    if (!response.ok) throw new Error('Failed to remove participant');
+    this.participantsSignal.update(participants => participants.filter(p => p.id !== id));
   }
 }

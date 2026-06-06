@@ -6,7 +6,7 @@ import { LucideCalendarDays, LucideMapPin, LucideDollarSign, LucideGift, LucideU
 import { PublicService } from './public.service';
 import { Participant } from '../../core/models/participant.model';
 import { Event } from '../../core/models/event.model';
-import { forkJoin, switchMap } from 'rxjs';
+
 import { HlmBadge } from '@spartan-ng/helm/badge';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { HlmInput } from '@spartan-ng/helm/input';
@@ -165,7 +165,7 @@ export class ParticipantAccessComponent implements OnInit {
     wish_3: ['']
   });
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.token = this.route.snapshot.paramMap.get('token') || '';
     if (!this.token) {
       this.error.set('Link de acesso inválido.');
@@ -173,74 +173,65 @@ export class ParticipantAccessComponent implements OnInit {
       return;
     }
 
-    this.publicService.getParticipantByToken(this.token).pipe(
-      switchMap((participant: Participant | null) => {
-        if (!participant) {
-          throw new Error('Convite não encontrado ou inválido.');
-        }
-        this.participant.set(participant);
-        return this.publicService.getEventById(participant.event_id.toString());
-      })
-    ).subscribe({
-      next: (event: Event) => {
-        this.event.set(event);
-        
-        // If already confirmed, redirect directly to reveal!
-        if (this.participant()!.confirmed_at) {
-          this.router.navigate(['/invite', this.token, 'reveal']);
-        } else {
-          this.isLoading.set(false);
-        }
-      },
-      error: (err) => {
-        this.error.set(err.message || 'Ocorreu um erro ao carregar o convite.');
+    try {
+      const participant = await this.publicService.getParticipantByToken(this.token);
+      if (!participant) {
+        throw new Error('Convite não encontrado ou inválido.');
+      }
+      this.participant.set(participant);
+      const event = await this.publicService.getEventById(participant.event_id.toString());
+      this.event.set(event);
+      
+      // If already confirmed, redirect directly to reveal!
+      if (this.participant()!.confirmed_at) {
+        this.router.navigate(['/invite', this.token, 'reveal']);
+      } else {
         this.isLoading.set(false);
       }
-    });
+    } catch (err: any) {
+      this.error.set(err.message || 'Ocorreu um erro ao carregar o convite.');
+      this.isLoading.set(false);
+    }
   }
 
-  protected onConfirmIdentity(): void {
+  protected async onConfirmIdentity(): Promise<void> {
     if (this.authForm.invalid) return;
 
     this.isVerifying.set(true);
     this.authError.set(null);
     const { name, email } = this.authForm.getRawValue();
 
-    this.publicService.verifyIdentity(this.participant()!.id, name, email).subscribe({
-      next: (isValid) => {
-        this.isVerifying.set(false);
-        if (isValid) {
-          this.step.set('wishlist');
-        } else {
-          this.authError.set('Os dados não conferem com os cadastrados pelo organizador.');
-        }
-      },
-      error: () => {
-        this.isVerifying.set(false);
-        this.authError.set('Erro ao verificar identidade. Tente novamente.');
+    try {
+      const isValid = await this.publicService.verifyIdentity(this.participant()!.id, name, email);
+      this.isVerifying.set(false);
+      if (isValid) {
+        this.step.set('wishlist');
+      } else {
+        this.authError.set('Os dados não conferem com os cadastrados pelo organizador.');
       }
-    });
+    } catch {
+      this.isVerifying.set(false);
+      this.authError.set('Erro ao verificar identidade. Tente novamente.');
+    }
   }
 
-  protected onSaveWishlist(): void {
+  protected async onSaveWishlist(): Promise<void> {
     if (this.wishlistForm.invalid) return;
 
     this.isSaving.set(true);
     const wishes = this.wishlistForm.getRawValue();
     const participantId = this.participant()!.id;
 
-    forkJoin([
-      this.publicService.saveWishlist(participantId, wishes),
-      this.publicService.markParticipantConfirmed(participantId)
-    ]).subscribe({
-      next: () => {
-        this.isSaving.set(false);
-        this.router.navigate(['/invite', this.token, 'reveal']);
-      },
-      error: () => {
-        this.isSaving.set(false);
-        alert('Erro ao salvar lista de desejos. Tente novamente.');
-      }
-    });
+    try {
+      await Promise.all([
+        this.publicService.saveWishlist(participantId, wishes),
+        this.publicService.markParticipantConfirmed(participantId)
+      ]);
+      this.isSaving.set(false);
+      this.router.navigate(['/invite', this.token, 'reveal']);
+    } catch {
+      this.isSaving.set(false);
+      alert('Erro ao salvar lista de desejos. Tente novamente.');
+    }
   }
 }

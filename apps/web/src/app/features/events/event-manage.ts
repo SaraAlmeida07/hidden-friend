@@ -191,7 +191,7 @@ export class EventManageComponent implements OnInit {
     email: ['', [Validators.required, Validators.email]]
   });
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.router.navigate(['/events']);
@@ -199,60 +199,63 @@ export class EventManageComponent implements OnInit {
     }
 
     // Load Event
-    this.eventService.getEventById(id).subscribe({
-      next: (ev) => {
-        this.event.set(ev);
-        this.isLoading.set(false);
-      },
-      error: () => {
-        this.router.navigate(['/events']);
-      }
-    });
+    try {
+      const ev = await this.eventService.getEventById(id);
+      this.event.set(ev);
+      this.isLoading.set(false);
+    } catch {
+      this.router.navigate(['/events']);
+      return;
+    }
 
     // Load Participants
-    this.participantService.loadParticipants(id).subscribe();
+    try {
+      await this.participantService.loadParticipants(id);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
-  protected onAddParticipant(): void {
+  protected async onAddParticipant(): Promise<void> {
     if (this.participantForm.invalid || !this.event()) return;
 
     this.isAdding.set(true);
     const { name, email } = this.participantForm.getRawValue();
 
-    this.participantService.addParticipant(this.event()!.id, name, email).subscribe({
-      next: () => {
-        this.isAdding.set(false);
-        this.participantForm.reset();
-      },
-      error: () => {
-        this.isAdding.set(false);
-        alert('Erro ao adicionar participante');
-      }
-    });
-  }
-
-  protected onRemoveParticipant(id: string): void {
-    if (confirm('Deseja realmente remover este participante?')) {
-      this.participantService.removeParticipant(id).subscribe();
+    try {
+      await this.participantService.addParticipant(this.event()!.id, name, email);
+      this.isAdding.set(false);
+      this.participantForm.reset();
+    } catch {
+      this.isAdding.set(false);
+      alert('Erro ao adicionar participante');
     }
   }
 
-  protected onPerformDraw(): void {
+  protected async onRemoveParticipant(id: string): Promise<void> {
+    if (confirm('Deseja realmente remover este participante?')) {
+      try {
+        await this.participantService.removeParticipant(id);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
+
+  protected async onPerformDraw(): Promise<void> {
     const ev = this.event();
     const participants = this.participantService.participants();
 
     if (!ev || participants.length < 3) return;
 
     this.isDrawing.set(true);
-    this.drawService.performDraw(ev.id, participants).subscribe({
-      next: () => {
-        this.isDrawing.set(false);
-        this.router.navigate(['/events', ev.id, 'results']);
-      },
-      error: (err) => {
-        this.isDrawing.set(false);
-        alert(err.message || 'Erro ao realizar o sorteio.');
-      }
-    });
+    try {
+      await this.drawService.performDraw(ev.id, participants);
+      this.isDrawing.set(false);
+      this.router.navigate(['/events', ev.id, 'results']);
+    } catch (err: any) {
+      this.isDrawing.set(false);
+      alert(err.message || 'Erro ao realizar o sorteio.');
+    }
   }
 }

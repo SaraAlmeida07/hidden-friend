@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideGift } from '@lucide/angular';
-import { switchMap } from 'rxjs';
+
 import { PublicService } from './public.service';
 import { Participant } from '../../core/models/participant.model';
 import { Wishlist } from '../../core/models/wishlist.model';
@@ -175,7 +175,7 @@ export class DrawRevealComponent implements OnInit {
   
   protected revealData = signal<{ receiver: Participant, wishlist: Wishlist | null } | null>(null);
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     const token = this.route.snapshot.paramMap.get('token');
     if (!token) {
       this.error.set('Link de acesso inválido.');
@@ -183,34 +183,29 @@ export class DrawRevealComponent implements OnInit {
       return;
     }
 
-    this.publicService.getParticipantByToken(token).pipe(
-      switchMap((participant: Participant | null) => {
-        if (!participant) {
-          throw new Error('Convite não encontrado ou inválido.');
-        }
-        if (!participant.confirmed_at) {
-          // Se acessar a rota de reveal mas ainda não confirmou identidade, redireciona de volta
-          this.router.navigate(['/invite', token]);
-          throw new Error('Você precisa confirmar sua identidade primeiro.');
-        }
-        return this.publicService.getDrawReveal(participant.id);
-      })
-    ).subscribe({
-      next: (data) => {
-        if (!data) {
-          this.error.set('O sorteio ainda não foi realizado ou não encontramos seu par.');
-        } else {
-          this.revealData.set(data);
-        }
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        if (!this.error()) {
-          this.error.set(err.message || 'Ocorreu um erro ao carregar a revelação.');
-        }
-        this.isLoading.set(false);
+    try {
+      const participant = await this.publicService.getParticipantByToken(token);
+      if (!participant) {
+        throw new Error('Convite não encontrado ou inválido.');
       }
-    });
+      if (!participant.confirmed_at) {
+        // Se acessar a rota de reveal mas ainda não confirmou identidade, redireciona de volta
+        this.router.navigate(['/invite', token]);
+        throw new Error('Você precisa confirmar sua identidade primeiro.');
+      }
+      const data = await this.publicService.getDrawReveal(participant.id);
+      if (!data) {
+        this.error.set('O sorteio ainda não foi realizado ou não encontramos seu par.');
+      } else {
+        this.revealData.set(data);
+      }
+      this.isLoading.set(false);
+    } catch (err: any) {
+      if (!this.error()) {
+        this.error.set(err.message || 'Ocorreu um erro ao carregar a revelação.');
+      }
+      this.isLoading.set(false);
+    }
   }
 
   protected reveal(): void {
