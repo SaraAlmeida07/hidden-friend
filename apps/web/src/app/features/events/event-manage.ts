@@ -7,120 +7,140 @@ import { EventService } from './event.service';
 import { ParticipantService } from '../participants/participant.service';
 import { DrawService } from '../draw/draw.service';
 import { Event } from '../../core/models/event.model';
+import { HlmBadge } from '@spartan-ng/helm/badge';
+import { HlmButton } from '@spartan-ng/helm/button';
+import { HlmInput } from '@spartan-ng/helm/input';
+import { HlmAvatarImports } from '@spartan-ng/helm/avatar';
 
 @Component({
   selector: 'app-event-manage',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, DatePipe, CurrencyPipe, LucideArrowLeft, LucideCalendarDays, LucideMapPin, LucideDollarSign, LucideSettings, LucideUserPlus, LucideTrash2, LucideWand2],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    DatePipe,
+    CurrencyPipe,
+    LucideArrowLeft,
+    LucideCalendarDays,
+    LucideMapPin,
+    LucideDollarSign,
+    LucideSettings,
+    LucideUserPlus,
+    LucideTrash2,
+    LucideWand2,
+    HlmBadge,
+    HlmButton,
+    HlmInput,
+    ...HlmAvatarImports
+  ],
   template: `
-    <div class="event-manage">
-      <div class="event-manage__blur"></div>
+    <div class="relative min-h-[calc(100dvh-133px)] bg-background overflow-hidden pb-32">
+      <div class="absolute rounded-full pointer-events-none w-[400px] h-[400px] -top-20 -right-20 bg-primary/10 blur-[80px]"></div>
 
       @if (isLoading()) {
-        <div class="loading-state">
-          <span class="spinner"></span>
+        <div class="flex flex-col items-center justify-center min-h-[50dvh] text-muted-foreground gap-4">
+          <span class="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></span>
           <p>Carregando evento...</p>
         </div>
       } @else if (event()) {
-        <div class="event-manage__content">
+        <div class="relative z-10 max-w-xl mx-auto px-6 py-8 flex flex-col gap-10">
           <!-- Header/Hero -->
-          <header class="event-hero">
-            <a routerLink="/events" class="back-link">
-              <svg lucideArrowLeft class="back-link__icon" aria-hidden="true"></svg>
+          <header class="flex flex-col gap-4">
+            <a routerLink="/events" class="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground no-underline transition-colors w-fit">
+              <svg lucideArrowLeft class="w-4 h-4" aria-hidden="true"></svg>
               Voltar
             </a>
             
-            <div class="event-hero__main">
-              <div class="event-hero__title-group">
-                <span class="badge" [class.badge--success]="event()!.status === 'draw_done'">
+            <div class="flex justify-between items-start gap-4">
+              <div class="flex flex-col gap-2.5">
+                <span hlmBadge [variant]="event()!.status === 'draw_done' ? 'default' : 'secondary'">
                   {{ event()!.status === 'pending' ? 'Sorteio Pendente' : 'Sorteio Realizado' }}
                 </span>
-                <h1 class="event-hero__title">{{ event()!.name }}</h1>
+                <h1 class="text-3xl font-extrabold text-foreground leading-tight m-0 tracking-tight">{{ event()!.name }}</h1>
               </div>
-              <a [routerLink]="['/events', event()!.id, 'edit']" class="btn btn--icon">
-                <svg lucideSettings class="btn__icon" aria-hidden="true"></svg>
+              <a [routerLink]="['/events', event()!.id, 'edit']" hlmBtn variant="ghost" size="icon" class="text-muted-foreground hover:text-foreground">
+                <svg lucideSettings class="w-5 h-5" aria-hidden="true"></svg>
               </a>
             </div>
 
-            <div class="event-hero__details">
-              <div class="detail-item">
-                <svg lucideCalendarDays class="detail-icon" aria-hidden="true"></svg>
+            <div class="flex flex-wrap gap-4 mt-2">
+              <div class="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <svg lucideCalendarDays class="w-4 h-4 text-primary stroke-current" aria-hidden="true"></svg>
                 <span>{{ event()!.date | date:'dd/MM/yyyy' }}</span>
               </div>
-              <div class="detail-item">
-                <svg lucideMapPin class="detail-icon" aria-hidden="true"></svg>
+              <div class="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <svg lucideMapPin class="w-4 h-4 text-primary stroke-current" aria-hidden="true"></svg>
                 <span>{{ event()!.location }}</span>
               </div>
-              <div class="detail-item">
-                <svg lucideDollarSign class="detail-icon" aria-hidden="true"></svg>
+              <div class="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <svg lucideDollarSign class="w-4 h-4 text-primary stroke-current" aria-hidden="true"></svg>
                 <span>{{ event()!.suggested_gift_value | currency:'BRL' }}</span>
               </div>
             </div>
-            
-            <p class="event-hero__subtitle">
-              Gerencie os participantes e prepare-se para o sorteio secreto.
-            </p>
           </header>
 
           @if (event()!.status === 'draw_done') {
-            <div class="draw-done-banner">
-              <h3>O sorteio já foi realizado!</h3>
-              <a [routerLink]="['/events', event()!.id, 'results']" class="btn btn--primary">
+            <div class="flex flex-col gap-4 items-center justify-center p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-center">
+              <h3 class="text-emerald-500 font-bold text-lg m-0">O sorteio já foi realizado!</h3>
+              <a [routerLink]="['/events', event()!.id, 'results']" hlmBtn class="w-full sm:w-auto">
                 Ver Resultados
               </a>
             </div>
           } @else {
             <!-- Add Participant Section -->
-            <section class="add-participant">
-              <h2 class="section-title">Novo Participante</h2>
-              <form class="add-participant__form" [formGroup]="participantForm" (ngSubmit)="onAddParticipant()">
-                <div class="form-group-row">
-                  <div class="form-field">
+            <section class="flex flex-col gap-4 p-5 bg-card border border-border rounded-xl relative overflow-hidden">
+              <div class="absolute rounded-full pointer-events-none w-32 h-32 -top-16 -right-16 bg-primary/10 blur-[32px]"></div>
+              <h2 class="text-lg font-bold text-foreground m-0 relative z-10">Novo Participante</h2>
+              <form class="flex flex-col gap-4 relative z-10" [formGroup]="participantForm" (ngSubmit)="onAddParticipant()">
+                <div class="flex flex-col sm:flex-row gap-4">
+                  <div class="flex-1">
                     <input
+                      hlmInput
                       type="text"
-                      class="form-field__input"
+                      class="w-full"
                       formControlName="name"
                       placeholder="Nome do participante"
                     />
                   </div>
-                  <div class="form-field">
+                  <div class="flex-1">
                     <input
+                      hlmInput
                       type="email"
-                      class="form-field__input"
+                      class="w-full"
                       formControlName="email"
                       placeholder="E-mail"
                     />
                   </div>
                 </div>
-                <button type="submit" class="btn btn--secondary" [disabled]="participantForm.invalid || isAdding()">
-                  <svg lucideUserPlus class="btn__icon" aria-hidden="true"></svg>
+                <button hlmBtn type="submit" variant="secondary" class="w-full" [disabled]="participantForm.invalid || isAdding()">
+                  <svg lucideUserPlus class="w-4 h-4 mr-2" aria-hidden="true"></svg>
                   Adicionar
                 </button>
               </form>
             </section>
 
             <!-- Participant List Section -->
-            <section class="participant-list">
-              <h2 class="section-title">Participantes ({{ participantService.participants().length }})</h2>
+            <section class="flex flex-col gap-4">
+              <h2 class="text-lg font-bold text-foreground m-0">Participantes ({{ participantService.participants().length }})</h2>
               
               @if (participantService.participants().length === 0) {
-                <div class="empty-state">
+                <div class="text-center py-8 px-4 text-muted-foreground text-sm bg-card border border-dashed border-border rounded-xl">
                   Nenhum participante adicionado ainda.
                 </div>
               } @else {
-                <div class="participants-grid">
+                <div class="flex flex-col gap-3">
                   @for (p of participantService.participants(); track p.id) {
-                    <div class="participant-card">
-                      <div class="participant-card__avatar">
-                        {{ p.name.charAt(0).toUpperCase() }}
+                    <div class="flex items-center gap-4 bg-card border border-border/60 rounded-xl p-4">
+                      <hlm-avatar class="w-10 h-10">
+                        <span hlmAvatarFallback class="bg-primary/20 text-primary font-bold">{{ p.name.charAt(0).toUpperCase() }}</span>
+                      </hlm-avatar>
+                      <div class="flex flex-col flex-1 min-w-0">
+                        <span class="text-sm font-semibold text-foreground truncate">{{ p.name }}</span>
+                        <span class="text-xs text-muted-foreground truncate">{{ p.email }}</span>
                       </div>
-                      <div class="participant-card__info">
-                        <span class="participant-card__name">{{ p.name }}</span>
-                        <span class="participant-card__email">{{ p.email }}</span>
-                      </div>
-                      <button class="btn btn--icon btn--danger" (click)="onRemoveParticipant(p.id)">
-                        <svg lucideTrash2 class="btn__icon" aria-hidden="true"></svg>
+                      <button hlmBtn variant="ghost" size="icon" class="text-destructive hover:bg-destructive/10 hover:text-destructive" (click)="onRemoveParticipant(p.id)">
+                        <svg lucideTrash2 class="w-4 h-4" aria-hidden="true"></svg>
                       </button>
                     </div>
                   }
@@ -128,444 +148,30 @@ import { Event } from '../../core/models/event.model';
               }
             </section>
 
-            <!-- Fixed Action Bar -->
-            <div class="fixed-action-bar">
+            <!-- Action Bar -->
+            <div class="flex flex-col items-center gap-2 mt-6">
               <button 
-                class="btn btn--jewel" 
+                hlmBtn 
+                class="w-full"
                 [disabled]="participantService.participants().length < 3 || isDrawing()"
                 (click)="onPerformDraw()"
               >
                 @if (isDrawing()) {
-                  <span class="btn__spinner"></span>
+                  <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                 } @else {
-                  <svg lucideWand2 class="btn__icon" aria-hidden="true"></svg>
+                  <svg lucideWand2 class="w-4 h-4 mr-2" aria-hidden="true"></svg>
                   Disparar Sorteio
                 }
               </button>
               @if (participantService.participants().length < 3) {
-                <span class="help-text">Mínimo de 3 participantes</span>
+                <span class="text-xs text-muted-foreground">Mínimo de 3 participantes</span>
               }
             </div>
           }
         </div>
       }
     </div>
-  `,
-  styles: `
-    .event-manage {
-      position: relative;
-      min-height: calc(100dvh - 133px);
-      background-color: #0b1326;
-      overflow: hidden;
-      padding-bottom: 120px; /* space for FAB */
-    }
-
-    .event-manage__blur {
-      position: absolute;
-      width: 400px;
-      height: 400px;
-      top: -100px;
-      right: -100px;
-      background: rgba(109, 40, 217, 0.1);
-      filter: blur(80px);
-      border-radius: 9999px;
-      pointer-events: none;
-    }
-
-    .event-manage__content {
-      position: relative;
-      z-index: 1;
-      padding: 32px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 40px;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    .event-hero {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: #94a3b8;
-      font-size: 14px;
-      font-weight: 500;
-      text-decoration: none;
-      width: fit-content;
-      transition: color 0.2s;
-    }
-
-    .back-link:hover {
-      color: #dae2fd;
-    }
-
-    .back-link__icon {
-      width: 16px;
-      height: 16px;
-      stroke: currentColor;
-    }
-
-    .event-hero__main {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 16px;
-    }
-
-    .event-hero__title-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .event-hero__title {
-      font-size: 30px;
-      font-weight: 800;
-      color: #dae2fd;
-      line-height: 1.2;
-      margin: 0;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 12px;
-      background-color: rgba(148, 163, 184, 0.1);
-      border-radius: 9999px;
-      font-size: 11px;
-      font-weight: 600;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      width: fit-content;
-    }
-
-    .badge--success {
-      background-color: rgba(0, 165, 114, 0.1);
-      color: #00a572;
-    }
-
-    .event-hero__details {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-top: 8px;
-    }
-
-    .detail-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: #ccc3d7;
-      font-size: 14px;
-    }
-
-    .detail-icon {
-      width: 16px;
-      height: 16px;
-      stroke: #6d28d9;
-    }
-
-    .event-hero__subtitle {
-      font-size: 16px;
-      color: #94a3b8;
-      margin: 0;
-    }
-
-    .draw-done-banner {
-      background-color: rgba(0, 165, 114, 0.1);
-      border: 1px solid rgba(0, 165, 114, 0.3);
-      border-radius: 12px;
-      padding: 24px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      align-items: center;
-    }
-
-    .draw-done-banner h3 {
-      color: #00a572;
-      margin: 0;
-      font-size: 18px;
-    }
-
-    .section-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: #dae2fd;
-      margin: 0 0 16px 0;
-    }
-
-    .add-participant {
-      background-color: #131b2e;
-      border: 1px solid rgba(74, 68, 85, 0.2);
-      border-radius: 12px;
-      padding: 20px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .add-participant::before {
-      content: '';
-      position: absolute;
-      width: 150px;
-      height: 150px;
-      top: -75px;
-      right: -75px;
-      background: rgba(109, 40, 217, 0.1);
-      filter: blur(40px);
-      border-radius: 50%;
-    }
-
-    .add-participant__form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .form-group-row {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    
-    @media (min-width: 480px) {
-      .form-group-row {
-        flex-direction: row;
-      }
-      .form-group-row .form-field {
-        flex: 1;
-      }
-    }
-
-    .form-field {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .form-field__input {
-      width: 100%;
-      height: 48px;
-      padding: 0 16px;
-      background-color: #060e20;
-      border: 1px solid rgba(74, 68, 85, 0.4);
-      border-radius: 8px;
-      color: #dae2fd;
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .form-field__input:focus {
-      border-color: #6d28d9;
-    }
-
-    .participant-list {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .participants-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .participant-card {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background-color: #060e20;
-      border: 1px solid rgba(74, 68, 85, 0.15);
-      border-radius: 8px;
-      padding: 12px 16px;
-    }
-
-    .participant-card__avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: linear-gradient(171deg, #5300b7 0%, #6d28d9 100%);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 16px;
-      flex-shrink: 0;
-    }
-
-    .participant-card__info {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      overflow: hidden;
-    }
-
-    .participant-card__name {
-      color: #dae2fd;
-      font-weight: 600;
-      font-size: 14px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .participant-card__email {
-      color: #94a3b8;
-      font-size: 12px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 24px;
-      color: #4a4455;
-      font-size: 14px;
-      background-color: #131b2e;
-      border: 1px dashed rgba(74, 68, 85, 0.4);
-      border-radius: 8px;
-    }
-
-    .fixed-action-bar {
-      position: fixed;
-      bottom: 80px; /* Above bottom nav */
-      left: 0;
-      right: 0;
-      padding: 16px 24px;
-      background: linear-gradient(to top, #0b1326 60%, transparent);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      z-index: 10;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      border-radius: 9999px;
-      border: none;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: transform 0.1s, opacity 0.2s;
-    }
-
-    .btn:active:not(:disabled) {
-      transform: scale(0.98);
-    }
-
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .btn--primary {
-      height: 48px;
-      padding: 0 24px;
-      background: linear-gradient(171deg, #5300b7 0%, #6d28d9 100%);
-      color: #ffffff;
-    }
-
-    .btn--secondary {
-      height: 48px;
-      padding: 0 24px;
-      background: rgba(109, 40, 217, 0.1);
-      color: #dae2fd;
-      border: 1px solid rgba(109, 40, 217, 0.3);
-    }
-
-    .btn--jewel {
-      height: 56px;
-      padding: 0 32px;
-      background: linear-gradient(171deg, #5300b7 0%, #6d28d9 100%);
-      color: #ffffff;
-      font-size: 16px;
-      box-shadow: 0px 8px 32px rgba(83, 0, 183, 0.3);
-      width: 100%;
-      max-width: 340px;
-    }
-
-    .btn--icon {
-      width: 40px;
-      height: 40px;
-      padding: 0;
-      background: transparent;
-      color: #94a3b8;
-    }
-
-    .btn--icon:hover {
-      background: rgba(255,255,255,0.05);
-    }
-
-    .btn--danger {
-      color: #f87171;
-    }
-
-    .btn--danger:hover {
-      background: rgba(248, 113, 113, 0.1);
-    }
-
-    .btn__icon {
-      width: 18px;
-      height: 18px;
-      stroke: currentColor;
-    }
-
-    .btn__spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-top-color: #ffffff;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
-    .help-text {
-      font-size: 12px;
-      color: #94a3b8;
-    }
-
-    .loading-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 50vh;
-      gap: 16px;
-      color: #94a3b8;
-    }
-
-    .spinner {
-      width: 24px;
-      height: 24px;
-      border: 2px solid rgba(109, 40, 217, 0.3);
-      border-top-color: #6d28d9;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-  `,
+  `
 })
 export class EventManageComponent implements OnInit {
   private fb = inject(FormBuilder);

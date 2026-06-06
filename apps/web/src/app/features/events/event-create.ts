@@ -3,102 +3,111 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { LucideArrowLeft } from '@lucide/angular';
 import { EventService } from './event.service';
+import { HlmInput } from '@spartan-ng/helm/input';
+import { HlmLabel } from '@spartan-ng/helm/label';
+import { HlmButton } from '@spartan-ng/helm/button';
 
 @Component({
   selector: 'app-event-create',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, LucideArrowLeft],
+  imports: [ReactiveFormsModule, RouterLink, LucideArrowLeft, HlmInput, HlmLabel, HlmButton],
   template: `
-    <div class="event-create">
-      <div class="event-create__blur"></div>
+    <div class="relative min-h-[calc(100dvh-133px)] bg-background overflow-hidden">
+      <!-- Decorative blur -->
+      <div class="absolute rounded-full pointer-events-none w-[400px] h-[400px] -top-20 -right-20 bg-primary/10 blur-[80px]"></div>
 
-      <div class="event-create__content">
+      <div class="relative z-10 max-w-xl mx-auto px-6 py-12 flex flex-col gap-10">
         <!-- Header -->
-        <header class="event-create__header">
-          <a routerLink="/events" class="back-link">
-            <svg lucideArrowLeft class="back-link__icon" aria-hidden="true"></svg>
+        <header class="flex flex-col gap-4">
+          <a routerLink="/events" class="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground no-underline transition-colors w-fit">
+            <svg lucideArrowLeft class="w-4 h-4" aria-hidden="true"></svg>
             Voltar
           </a>
-          <h1 class="event-create__title">Novo Evento</h1>
-          <p class="event-create__subtitle">
+          <h1 class="text-[44px] font-extrabold text-foreground leading-none m-0 tracking-tight">Novo Evento</h1>
+          <p class="text-lg text-muted-foreground m-0">
             Crie um momento inesquecível para o seu grupo.
           </p>
         </header>
 
         <!-- Form -->
-        <form class="event-form" [formGroup]="form" (ngSubmit)="onSubmit()">
-          <div class="form-field">
-            <label class="form-field__label" for="name">Nome do Evento</label>
+        <form class="flex flex-col gap-6" [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div class="flex flex-col gap-2">
+            <label hlmLabel for="name">Nome do Evento</label>
             <input
+              hlmInput
               id="name"
               type="text"
-              class="form-field__input"
+              class="w-full"
               formControlName="name"
               placeholder="Ex: Amigo Secreto da Família"
             />
             @if (form.get('name')?.invalid && form.get('name')?.touched) {
-              <span class="form-field__error">Nome é obrigatório.</span>
+              <span class="text-xs text-destructive">Nome é obrigatório.</span>
             }
           </div>
 
-          <div class="form-group-row">
-            <div class="form-field">
-              <label class="form-field__label" for="date">Data da Revelação</label>
+          <div class="flex flex-col sm:flex-row gap-6">
+            <div class="flex flex-col gap-2 flex-1">
+              <label hlmLabel for="date">Data da Revelação</label>
               <input
+                hlmInput
                 id="date"
                 type="date"
-                class="form-field__input"
+                class="w-full"
                 formControlName="date"
               />
               @if (form.get('date')?.invalid && form.get('date')?.touched) {
-                <span class="form-field__error">Data inválida.</span>
+                <span class="text-xs text-destructive">Data inválida.</span>
               }
             </div>
 
-            <div class="form-field">
-              <label class="form-field__label" for="location">Local da Troca</label>
+            <div class="flex flex-col gap-2 flex-1">
+              <label hlmLabel for="location">Local da Troca</label>
               <input
+                hlmInput
                 id="location"
                 type="text"
-                class="form-field__input"
+                class="w-full"
                 formControlName="location"
                 placeholder="Ex: Casa da Vó"
               />
               @if (form.get('location')?.invalid && form.get('location')?.touched) {
-                <span class="form-field__error">Local é obrigatório.</span>
+                <span class="text-xs text-destructive">Local é obrigatório.</span>
               }
             </div>
           </div>
 
-          <div class="form-field">
-            <label class="form-field__label" for="suggestedValue">Valor Sugerido (R$)</label>
+          <div class="flex flex-col gap-2">
+            <label hlmLabel for="suggestedValue">Valor Sugerido (R$)</label>
             <input
+              hlmInput
               id="suggestedValue"
               type="number"
-              class="form-field__input"
+              class="w-full"
               formControlName="suggested_gift_value"
               placeholder="Ex: 50.00"
               min="0"
               step="0.01"
             />
             @if (form.get('suggested_gift_value')?.invalid && form.get('suggested_gift_value')?.touched) {
-              <span class="form-field__error">Valor inválido.</span>
+              <span class="text-xs text-destructive">Valor inválido.</span>
             }
           </div>
 
           @if (errorMessage) {
-            <div class="form-field__error" style="text-align: center;">{{ errorMessage }}</div>
+            <div class="text-xs text-destructive text-center">{{ errorMessage }}</div>
           }
 
-          <div class="event-form__actions">
+          <div class="flex flex-col pt-4">
             <button
+              hlmBtn
               type="submit"
-              class="btn btn--primary"
+              class="w-full"
               [disabled]="form.invalid || isLoading"
             >
               @if (isLoading) {
-                <span class="btn__spinner"></span>
+                <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
               } @else {
                 Criar Evento
               }
@@ -107,193 +116,7 @@ import { EventService } from './event.service';
         </form>
       </div>
     </div>
-  `,
-  styles: `
-    .event-create {
-      position: relative;
-      min-height: calc(100dvh - 133px);
-      background-color: #0b1326;
-      overflow: hidden;
-    }
-
-    .event-create__blur {
-      position: absolute;
-      width: 400px;
-      height: 400px;
-      top: -100px;
-      right: -100px;
-      background: rgba(109, 40, 217, 0.1);
-      filter: blur(80px);
-      border-radius: 9999px;
-      pointer-events: none;
-    }
-
-    .event-create__content {
-      position: relative;
-      z-index: 1;
-      padding: 32px 24px 48px;
-      display: flex;
-      flex-direction: column;
-      gap: 40px;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    .event-create__header {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: #94a3b8;
-      font-size: 14px;
-      font-weight: 500;
-      text-decoration: none;
-      width: fit-content;
-      transition: color 0.2s;
-    }
-
-    .back-link:hover {
-      color: #dae2fd;
-    }
-
-    .back-link__icon {
-      width: 16px;
-      height: 16px;
-      stroke: currentColor;
-    }
-
-    .event-create__title {
-      font-size: 44px;
-      font-weight: 800;
-      color: #dae2fd;
-      line-height: 55px;
-      margin: 0;
-    }
-
-    .event-create__subtitle {
-      font-size: 18px;
-      color: #ccc3d7;
-      line-height: 29px;
-      margin: 0;
-    }
-
-    .event-form {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    .form-group-row {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-    
-    @media (min-width: 480px) {
-      .form-group-row {
-        flex-direction: row;
-      }
-      .form-group-row .form-field {
-        flex: 1;
-      }
-    }
-
-    .form-field {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .form-field__label {
-      font-size: 14px;
-      font-weight: 500;
-      color: #ccc3d7;
-    }
-
-    .form-field__input {
-      width: 100%;
-      height: 52px;
-      padding: 0 16px;
-      background-color: #131b2e;
-      border: 1px solid rgba(74, 68, 85, 0.4);
-      border-radius: 8px;
-      color: #dae2fd;
-      font-family: 'Inter', sans-serif;
-      font-size: 16px;
-      outline: none;
-      transition: border-color 0.2s;
-      box-sizing: border-box;
-    }
-
-    .form-field__input::placeholder {
-      color: #4a4455;
-    }
-
-    .form-field__input:focus {
-      border-color: #6d28d9;
-    }
-
-    .form-field__error {
-      font-size: 12px;
-      color: #f87171;
-    }
-
-    .event-form__actions {
-      display: flex;
-      flex-direction: column;
-      padding-top: 16px;
-    }
-
-    .btn {
-      width: 100%;
-      height: 56px;
-      border-radius: 9999px;
-      border: none;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      font-size: 16px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      text-decoration: none;
-      transition: transform 0.1s, opacity 0.2s;
-    }
-
-    .btn:active {
-      transform: scale(0.98);
-    }
-
-    .btn--primary {
-      background: linear-gradient(171deg, #5300b7 0%, #6d28d9 100%);
-      color: #ffffff;
-      box-shadow: 0px 8px 32px rgba(83, 0, 183, 0.2);
-    }
-
-    .btn--primary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .btn__spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-top-color: #ffffff;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-  `,
+  `
 })
 export class EventCreateComponent {
   private fb = inject(FormBuilder);
