@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { LucideGift, LucideShieldCheck } from '@lucide/angular';
 import { AuthService } from '../../core/auth/auth.service';
@@ -8,13 +8,21 @@ import { HlmButton } from '@spartan-ng/helm/button';
 import { HlmInput } from '@spartan-ng/helm/input';
 import { HlmLabel } from '@spartan-ng/helm/label';
 
+export const passwordsMatchValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+  const password = control.get('password');
+  const confirmPassword = control.get('confirmPassword');
+  return password && confirmPassword && password.value !== confirmPassword.value 
+    ? { passwordMismatch: true } 
+    : null;
+};
+
 @Component({
   selector: 'app-register',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
-    FormsModule,
+    ReactiveFormsModule,
     LucideGift,
     LucideShieldCheck,
     HlmButton,
@@ -41,22 +49,19 @@ import { HlmLabel } from '@spartan-ng/helm/label';
         </div>
 
         <!-- Form -->
-        <form class="flex flex-col gap-5" (ngSubmit)="onSubmit()" #regForm="ngForm" novalidate>
+        <form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
           <div class="flex flex-col gap-2">
             <label hlmLabel for="fullName">Nome Completo</label>
             <input
               hlmInput
               id="fullName"
-              name="fullName"
               type="text"
               class="w-full"
               placeholder="Seu nome completo"
-              required
-              [(ngModel)]="fullName"
-              #nameRef="ngModel"
+              formControlName="fullName"
             />
-            @if (nameRef.invalid && nameRef.touched) {
-              <span class="text-xs text-destructive">Nome é obrigatório</span>
+            @if (form.get('fullName')?.invalid && form.get('fullName')?.touched) {
+              <span class="text-xs text-destructive">Nome é obrigatório.</span>
             }
           </div>
 
@@ -65,16 +70,19 @@ import { HlmLabel } from '@spartan-ng/helm/label';
             <input
               hlmInput
               id="regEmail"
-              name="email"
               type="email"
               class="w-full"
               placeholder="seu@email.com"
-              required
-              [(ngModel)]="email"
-              #emailRef="ngModel"
+              formControlName="email"
             />
-            @if (emailRef.invalid && emailRef.touched) {
-              <span class="text-xs text-destructive">E-mail inválido</span>
+            @if (form.get('email')?.invalid && form.get('email')?.touched) {
+              <span class="text-xs text-destructive">
+                @if (form.get('email')?.hasError('required')) {
+                  E-mail é obrigatório.
+                } @else if (form.get('email')?.hasError('email')) {
+                  E-mail inválido.
+                }
+              </span>
             }
           </div>
 
@@ -83,17 +91,19 @@ import { HlmLabel } from '@spartan-ng/helm/label';
             <input
               hlmInput
               id="regPassword"
-              name="password"
               type="password"
               class="w-full"
               placeholder="Mínimo 8 caracteres"
-              required
-              minlength="8"
-              [(ngModel)]="password"
-              #passwordRef="ngModel"
+              formControlName="password"
             />
-            @if (passwordRef.invalid && passwordRef.touched) {
-              <span class="text-xs text-destructive">Mínimo de 8 caracteres</span>
+            @if (form.get('password')?.invalid && form.get('password')?.touched) {
+              <span class="text-xs text-destructive">
+                @if (form.get('password')?.hasError('required')) {
+                  Senha é obrigatória.
+                } @else if (form.get('password')?.hasError('minlength')) {
+                  Mínimo de 8 caracteres.
+                }
+              </span>
             }
           </div>
 
@@ -102,16 +112,13 @@ import { HlmLabel } from '@spartan-ng/helm/label';
             <input
               hlmInput
               id="confirmPassword"
-              name="confirmPassword"
               type="password"
               class="w-full"
               placeholder="Repita a senha"
-              required
-              [(ngModel)]="confirmPassword"
-              #confirmRef="ngModel"
+              formControlName="confirmPassword"
             />
-            @if (confirmRef.touched && password !== confirmPassword) {
-              <span class="text-xs text-destructive">As senhas não coincidem</span>
+            @if (form.get('confirmPassword')?.touched && form.hasError('passwordMismatch')) {
+              <span class="text-xs text-destructive">As senhas não coincidem.</span>
             }
           </div>
 
@@ -124,7 +131,7 @@ import { HlmLabel } from '@spartan-ng/helm/label';
               hlmBtn
               type="submit"
               class="w-full"
-              [disabled]="regForm.invalid || isLoading || password !== confirmPassword"
+              [disabled]="form.invalid || isLoading"
             >
               @if (isLoading) {
                 <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -149,23 +156,29 @@ import { HlmLabel } from '@spartan-ng/helm/label';
   `
 })
 export class RegisterComponent {
+  private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  protected fullName = '';
-  protected email = '';
-  protected password = '';
-  protected confirmPassword = '';
   protected isLoading = false;
   protected errorMessage = '';
 
+  protected form = this.fb.nonNullable.group({
+    fullName: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(8)]],
+    confirmPassword: ['', Validators.required]
+  }, { validators: passwordsMatchValidator });
+
   protected async onSubmit(): Promise<void> {
-    if (this.password !== this.confirmPassword || !this.fullName || !this.email) return;
+    if (this.form.invalid) return;
     this.isLoading = true;
     this.errorMessage = '';
 
+    const { fullName, email, password } = this.form.getRawValue();
+
     try {
-      const user = await this.authService.register(this.fullName, this.email, this.password);
+      const user = await this.authService.register(fullName, email, password);
       this.isLoading = false;
       if (user) {
         this.router.navigate(['/events']);
@@ -178,4 +191,3 @@ export class RegisterComponent {
     }
   }
 }
-
