@@ -192,27 +192,34 @@ export class EventManageComponent implements OnInit {
   });
 
   async ngOnInit(): Promise<void> {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) {
-      this.router.navigate(['/events']);
-      return;
-    }
-
-    // Load Event
-    try {
-      const ev = await this.eventService.getEventById(id);
+    const ev = this.route.snapshot.data['event'] as Event;
+    if (ev) {
       this.event.set(ev);
       this.isLoading.set(false);
-    } catch {
-      this.router.navigate(['/events']);
-      return;
-    }
+      
+      // Load Participants
+      try {
+        await this.participantService.loadParticipants(ev.id);
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      const id = this.route.snapshot.paramMap.get('id');
+      if (!id) {
+        this.router.navigate(['/events']);
+        return;
+      }
 
-    // Load Participants
-    try {
-      await this.participantService.loadParticipants(id);
-    } catch (e) {
-      console.error(e);
+      // Load Event
+      try {
+        const fetchedEv = await this.eventService.getEventById(id);
+        this.event.set(fetchedEv);
+        this.isLoading.set(false);
+        await this.participantService.loadParticipants(id);
+      } catch {
+        this.router.navigate(['/events']);
+        return;
+      }
     }
   }
 

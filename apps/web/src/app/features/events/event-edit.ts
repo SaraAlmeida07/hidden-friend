@@ -155,15 +155,9 @@ export class EventEditComponent implements OnInit {
   });
 
   async ngOnInit(): Promise<void> {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) {
-      this.router.navigate(['/events']);
-      return;
-    }
-
-    this.eventId.set(id);
-    try {
-      const event = await this.eventService.getEventById(id);
+    const event = this.route.snapshot.data['event'] as Event;
+    if (event) {
+      this.eventId.set(event.id);
       this.form.patchValue({
         name: event.name,
         date: event.date,
@@ -171,9 +165,27 @@ export class EventEditComponent implements OnInit {
         suggested_gift_value: event.suggested_gift_value
       });
       this.isLoadingData.set(false);
-    } catch {
-      this.isLoadingData.set(false);
-      this.errorMessage.set('Erro ao carregar os dados do evento.');
+    } else {
+      const id = this.route.snapshot.paramMap.get('id');
+      if (!id) {
+        this.router.navigate(['/events']);
+        return;
+      }
+
+      this.eventId.set(id);
+      try {
+        const fetchedEvent = await this.eventService.getEventById(id);
+        this.form.patchValue({
+          name: fetchedEvent.name,
+          date: fetchedEvent.date,
+          location: fetchedEvent.location,
+          suggested_gift_value: fetchedEvent.suggested_gift_value
+        });
+        this.isLoadingData.set(false);
+      } catch {
+        this.isLoadingData.set(false);
+        this.errorMessage.set('Erro ao carregar os dados do evento.');
+      }
     }
   }
 

@@ -91,29 +91,40 @@ export class EventResultsComponent implements OnInit {
   protected copiedId = signal<string | null>(null);
 
   async ngOnInit(): Promise<void> {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) {
-      this.router.navigate(['/events']);
-      return;
-    }
-
-    try {
-      const ev = await this.eventService.getEventById(id);
+    const ev = this.route.snapshot.data['event'] as Event;
+    if (ev) {
       if (ev.status !== 'draw_done') {
-        this.router.navigate(['/events', id, 'manage']);
+        this.router.navigate(['/events', ev.id, 'manage']);
         return;
       }
       this.event.set(ev);
       this.isLoading.set(false);
-    } catch {
-      this.router.navigate(['/events']);
-      return;
-    }
+      
+      try {
+        await this.participantService.loadParticipants(ev.id);
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      const id = this.route.snapshot.paramMap.get('id');
+      if (!id) {
+        this.router.navigate(['/events']);
+        return;
+      }
 
-    try {
-      await this.participantService.loadParticipants(id);
-    } catch (e) {
-      console.error(e);
+      try {
+        const fetchedEv = await this.eventService.getEventById(id);
+        if (fetchedEv.status !== 'draw_done') {
+          this.router.navigate(['/events', id, 'manage']);
+          return;
+        }
+        this.event.set(fetchedEv);
+        this.isLoading.set(false);
+        await this.participantService.loadParticipants(id);
+      } catch {
+        this.router.navigate(['/events']);
+        return;
+      }
     }
   }
 

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { eventResolver } from './event.resolver';
 
 export const EVENTS_ROUTES: Routes = [
   {
@@ -13,16 +14,19 @@ export const EVENTS_ROUTES: Routes = [
   },
   {
     path: ':id/edit',
+    resolve: { event: eventResolver },
     loadComponent: () =>
       import('./event-edit').then((m) => m.EventEditComponent),
   },
   {
     path: ':id/manage',
+    resolve: { event: eventResolver },
     loadComponent: () =>
       import('./event-manage').then((m) => m.EventManageComponent),
   },
   {
     path: ':id/results',
+    resolve: { event: eventResolver },
     loadComponent: () =>
       import('./event-results').then((m) => m.EventResultsComponent),
   },
