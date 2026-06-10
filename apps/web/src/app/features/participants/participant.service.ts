@@ -1,19 +1,24 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { Participant } from '../../core/models/participant.model';
+import { SupabaseService } from '../../core/supabase/supabase.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ParticipantService {
-  private apiUrl = 'http://localhost:3000/participants';
+  private supabaseService = inject(SupabaseService);
 
   private participantsSignal = signal<Participant[]>([]);
   readonly participants = this.participantsSignal.asReadonly();
 
   async loadParticipants(eventId: string): Promise<Participant[]> {
-    const response = await fetch(`${this.apiUrl}?event_id=${eventId}`);
-    if (!response.ok) throw new Error('Failed to load participants');
-    const participants: Participant[] = await response.json();
+    const { data, error } = await this.supabaseService.client
+      .from('participants')
+      .select('*')
+      .eq('event_id', eventId);
+
+    if (error) throw error;
+    const participants: Participant[] = data || [];
     this.participantsSignal.set(participants);
     return participants;
   }
@@ -24,30 +29,27 @@ export class ParticipantService {
       name,
       email,
       token: crypto.randomUUID(),
-      confirmed_at: null,
-      created_at: new Date().toISOString()
+      confirmed_at: null
     };
 
-    const response = await fetch(this.apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(newParticipant)
-    });
+    const { data, error } = await this.supabaseService.client
+      .from('participants')
+      .insert(newParticipant)
+      .select()
+      .single();
 
-    if (!response.ok) throw new Error('Failed to add participant');
-    const created: Participant = await response.json();
-    this.participantsSignal.update(participants => [...participants, created]);
-    return created;
+    if (error || !data) throw error || new Error('Failed to add participant');
+    this.participantsSignal.update(participants => [...participants, data]);
+    return data;
   }
 
   async removeParticipant(id: string): Promise<void> {
-    const response = await fetch(`${this.apiUrl}/${id}`, {
-      method: 'DELETE'
-    });
+    const { error } = await this.supabaseService.client
+      .from('participants')
+      .delete()
+      .eq('id', id);
 
-    if (!response.ok) throw new Error('Failed to remove participant');
+    if (error) throw error;
     this.participantsSignal.update(participants => participants.filter(p => p.id !== id));
   }
 }

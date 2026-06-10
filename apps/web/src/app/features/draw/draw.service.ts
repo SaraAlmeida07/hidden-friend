@@ -2,15 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { Participant } from '../../core/models/participant.model';
 import { Draw, DrawResult } from '../../core/models/draw.model';
 import { EventService } from '../events/event.service';
+import { SupabaseService } from '../../core/supabase/supabase.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DrawService {
   private eventService = inject(EventService);
-
-  private apiUrlDraws = 'http://localhost:3000/draws';
-  private apiUrlDrawResults = 'http://localhost:3000/draw_results';
+  private supabaseService = inject(SupabaseService);
 
   async performDraw(eventId: string, participants: Participant[]): Promise<boolean> {
     if (participants.length < 3) {
@@ -23,16 +22,13 @@ export class DrawService {
       performed_at: new Date().toISOString()
     };
 
-    const resDraw = await fetch(this.apiUrlDraws, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(newDraw)
-    });
+    const { data: draw, error: drawError } = await this.supabaseService.client
+      .from('draws')
+      .insert(newDraw)
+      .select()
+      .single();
 
-    if (!resDraw.ok) throw new Error('Failed to create draw');
-    const draw: Draw = await resDraw.json();
+    if (drawError || !draw) throw drawError || new Error('Failed to create draw');
 
     // 2. Generate pairs
     const shuffled = [...participants].sort(() => Math.random() - 0.5);
@@ -45,17 +41,12 @@ export class DrawService {
       };
     });
 
-    // 3. Save all pairs sequentially to avoid json-server lock errors
-    for (const pair of pairs) {
-      const resPair = await fetch(this.apiUrlDrawResults, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(pair)
-      });
-      if (!resPair.ok) throw new Error('Failed to save draw result');
-    }
+    // 3. Save all pairs in a single bulk insert
+    const { error: resultsError } = await this.supabaseService.client
+      .from('draw_results')
+      .insert(pairs);
+
+    if (resultsError) throw resultsError;
 
     // 4. Update Event Status
     await this.eventService.updateEvent(eventId, { status: 'draw_done' });
@@ -64,14 +55,22 @@ export class DrawService {
   }
 
   async getDrawByEventId(eventId: string): Promise<Draw[]> {
-    const response = await fetch(`${this.apiUrlDraws}?event_id=${eventId}`);
-    if (!response.ok) throw new Error('Failed to get draw');
-    return response.json();
+    const { data, error } = await this.supabaseService.client
+      .from('draws')
+      .select('*')
+      .eq('event_id', eventId);
+
+    if (error) throw error;
+    return data || [];
   }
 
   async getDrawResults(drawId: string): Promise<DrawResult[]> {
-    const response = await fetch(`${this.apiUrlDrawResults}?draw_id=${drawId}`);
-    if (!response.ok) throw new Error('Failed to get draw results');
-    return response.json();
+    const { data, error } = await this.supabaseService.client
+      .from('draw_results')
+      .select('*')
+      .eq('draw_id', drawId);
+
+    if (error) throw error;
+    return data || [];
   }
 }
