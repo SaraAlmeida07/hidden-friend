@@ -154,7 +154,7 @@ export class EventEditComponent implements OnInit {
     suggested_gift_value: [0, [Validators.required, Validators.min(0)]]
   });
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.router.navigate(['/events']);
@@ -162,24 +162,22 @@ export class EventEditComponent implements OnInit {
     }
 
     this.eventId.set(id);
-    this.eventService.getEventById(id).subscribe({
-      next: (event) => {
-        this.form.patchValue({
-          name: event.name,
-          date: event.date,
-          location: event.location,
-          suggested_gift_value: event.suggested_gift_value
-        });
-        this.isLoadingData.set(false);
-      },
-      error: () => {
-        this.isLoadingData.set(false);
-        this.errorMessage.set('Erro ao carregar os dados do evento.');
-      }
-    });
+    try {
+      const event = await this.eventService.getEventById(id);
+      this.form.patchValue({
+        name: event.name,
+        date: event.date,
+        location: event.location,
+        suggested_gift_value: event.suggested_gift_value
+      });
+      this.isLoadingData.set(false);
+    } catch {
+      this.isLoadingData.set(false);
+      this.errorMessage.set('Erro ao carregar os dados do evento.');
+    }
   }
 
-  protected onSubmit(): void {
+  protected async onSubmit(): Promise<void> {
     if (this.form.invalid) return;
 
     this.isSaving.set(true);
@@ -187,33 +185,29 @@ export class EventEditComponent implements OnInit {
 
     const eventData = this.form.getRawValue();
 
-    this.eventService.updateEvent(this.eventId(), eventData).subscribe({
-      next: () => {
-        this.isSaving.set(false);
-        this.router.navigate(['/events', this.eventId(), 'manage']);
-      },
-      error: () => {
-        this.isSaving.set(false);
-        this.errorMessage.set('Erro ao atualizar evento. Tente novamente.');
-      }
-    });
+    try {
+      await this.eventService.updateEvent(this.eventId(), eventData);
+      this.isSaving.set(false);
+      this.router.navigate(['/events', this.eventId(), 'manage']);
+    } catch {
+      this.isSaving.set(false);
+      this.errorMessage.set('Erro ao atualizar evento. Tente novamente.');
+    }
   }
 
-  protected onDelete(): void {
+  protected async onDelete(): Promise<void> {
     if (!confirm('Tem certeza que deseja excluir este evento? Esta ação não pode ser desfeita.')) {
       return;
     }
     
     this.isSaving.set(true);
-    this.eventService.deleteEvent(this.eventId()).subscribe({
-      next: () => {
-        this.isSaving.set(false);
-        this.router.navigate(['/events']);
-      },
-      error: () => {
-        this.isSaving.set(false);
-        this.errorMessage.set('Erro ao excluir o evento.');
-      }
-    });
+    try {
+      await this.eventService.deleteEvent(this.eventId());
+      this.isSaving.set(false);
+      this.router.navigate(['/events']);
+    } catch {
+      this.isSaving.set(false);
+      this.errorMessage.set('Erro ao excluir o evento.');
+    }
   }
 }

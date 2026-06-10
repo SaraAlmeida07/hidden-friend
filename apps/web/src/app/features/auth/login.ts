@@ -116,25 +116,23 @@ export class LoginComponent {
   protected isLoading = false;
   protected errorMessage = '';
 
-  protected onSubmit(): void {
+  protected async onSubmit(): Promise<void> {
     if (!this.email || !this.password) return;
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.authService.login(this.email, this.password).subscribe({
-      next: (user) => {
-        this.isLoading = false;
-        if (user) {
-          this.router.navigate(['/events']);
-        } else {
-          this.errorMessage = 'E-mail ou senha incorretos.';
-        }
-      },
-      error: () => {
-        this.isLoading = false;
-        this.errorMessage = 'Erro ao fazer login. Tente novamente.';
+    try {
+      const user = await this.authService.login(this.email, this.password);
+      this.isLoading = false;
+      if (user) {
+        this.router.navigate(['/events']);
+      } else {
+        this.errorMessage = 'E-mail ou senha incorretos.';
       }
-    });
+    } catch {
+      this.isLoading = false;
+      this.errorMessage = 'Erro ao fazer login. Tente novamente.';
+    }
   }
 }
 

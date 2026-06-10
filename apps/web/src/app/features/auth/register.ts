@@ -159,25 +159,23 @@ export class RegisterComponent {
   protected isLoading = false;
   protected errorMessage = '';
 
-  protected onSubmit(): void {
+  protected async onSubmit(): Promise<void> {
     if (this.password !== this.confirmPassword || !this.fullName || !this.email) return;
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.authService.register(this.fullName, this.email, this.password).subscribe({
-      next: (user) => {
-        this.isLoading = false;
-        if (user) {
-          this.router.navigate(['/events']);
-        } else {
-          this.errorMessage = 'Erro ao criar conta.';
-        }
-      },
-      error: () => {
-        this.isLoading = false;
-        this.errorMessage = 'Erro ao criar conta. Tente novamente.';
+    try {
+      const user = await this.authService.register(this.fullName, this.email, this.password);
+      this.isLoading = false;
+      if (user) {
+        this.router.navigate(['/events']);
+      } else {
+        this.errorMessage = 'Erro ao criar conta.';
       }
-    });
+    } catch {
+      this.isLoading = false;
+      this.errorMessage = 'Erro ao criar conta. Tente novamente.';
+    }
   }
 }
 

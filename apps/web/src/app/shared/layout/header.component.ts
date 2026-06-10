@@ -4,7 +4,7 @@ import { LucideGift, LucideBell } from '@lucide/angular';
 import { HlmButton } from '@spartan-ng/helm/button';
 
 @Component({
-  selector: 'app-top-app-bar',
+  selector: 'app-header',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, LucideGift, LucideBell, HlmButton],
@@ -29,4 +29,4 @@ import { HlmButton } from '@spartan-ng/helm/button';
     </header>
   `
 })
-export class TopAppBarComponent {}
+export class HeaderComponent {}
