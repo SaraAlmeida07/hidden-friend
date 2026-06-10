@@ -12,10 +12,12 @@ export class AuthService {
   // State
   private userSignal = signal<User | null>(null);
   private sessionSignal = signal<Session | null>(null);
+  private initializedSignal = signal<boolean>(false);
   
   // Selectors
   readonly currentUser = this.userSignal.asReadonly();
   readonly currentSession = this.sessionSignal.asReadonly();
+  readonly isInitialized = this.initializedSignal.asReadonly();
   readonly isAuthenticated = computed(() => this.userSignal() !== null);
 
   constructor() {
@@ -47,6 +49,7 @@ export class AuthService {
     } else {
       this.userSignal.set(null);
     }
+    this.initializedSignal.set(true);
   }
 
   async login(email: string, password_hash: string): Promise<User | null> {

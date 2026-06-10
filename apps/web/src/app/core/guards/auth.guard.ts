@@ -1,14 +1,22 @@
 import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { filter, map, take } from 'rxjs/operators';
 
 export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (authService.isAuthenticated()) {
-    return true;
-  }
+  return toObservable(authService.isInitialized).pipe(
+    filter((initialized) => initialized),
+    take(1),
+    map(() => {
+      if (authService.isAuthenticated()) {
+        return true;
+      }
 
-  return router.parseUrl('/auth/login');
+      return router.parseUrl('/auth/login');
+    })
+  );
 };
