@@ -3,6 +3,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { LucideArrowLeft } from '@lucide/angular';
 import { EventService } from './event.service';
+import { Event } from '../../core/models/event.model';
 import { HlmInput } from '@spartan-ng/helm/input';
 import { HlmLabel } from '@spartan-ng/helm/label';
 import { HlmButton } from '@spartan-ng/helm/button';
