@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { LucideGift, LucideShieldCheck } from '@lucide/angular';
 import { AuthService } from '../../core/auth/auth.service';
@@ -14,7 +14,7 @@ import { HlmLabel } from '@spartan-ng/helm/label';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
-    FormsModule,
+    ReactiveFormsModule,
     LucideGift,
     LucideShieldCheck,
     HlmButton,
@@ -36,22 +36,25 @@ import { HlmLabel } from '@spartan-ng/helm/label';
         </div>
 
         <!-- Form -->
-        <form class="flex flex-col gap-6" (ngSubmit)="onSubmit()" #loginForm="ngForm" novalidate>
+        <form class="flex flex-col gap-6" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
           <div class="flex flex-col gap-2">
             <label hlmLabel for="email">E-mail</label>
             <input
               hlmInput
               id="email"
-              name="email"
               type="email"
               class="w-full"
               placeholder="seu@email.com"
-              required
-              [(ngModel)]="email"
-              #emailRef="ngModel"
+              formControlName="email"
             />
-            @if (emailRef.invalid && emailRef.touched) {
-              <span class="text-xs text-destructive">E-mail inválido</span>
+            @if (form.get('email')?.invalid && form.get('email')?.touched) {
+              <span class="text-xs text-destructive">
+                @if (form.get('email')?.hasError('required')) {
+                  E-mail é obrigatório.
+                } @else if (form.get('email')?.hasError('email')) {
+                  E-mail inválido.
+                }
+              </span>
             }
           </div>
 
@@ -60,17 +63,19 @@ import { HlmLabel } from '@spartan-ng/helm/label';
             <input
               hlmInput
               id="password"
-              name="password"
               type="password"
               class="w-full"
               placeholder="••••••••"
-              required
-              minlength="6"
-              [(ngModel)]="password"
-              #passwordRef="ngModel"
+              formControlName="password"
             />
-            @if (passwordRef.invalid && passwordRef.touched) {
-              <span class="text-xs text-destructive">Mínimo de 6 caracteres</span>
+            @if (form.get('password')?.invalid && form.get('password')?.touched) {
+              <span class="text-xs text-destructive">
+                @if (form.get('password')?.hasError('required')) {
+                  Senha é obrigatória.
+                } @else if (form.get('password')?.hasError('minlength')) {
+                  Mínimo de 6 caracteres.
+                }
+              </span>
             }
           </div>
 
@@ -83,7 +88,7 @@ import { HlmLabel } from '@spartan-ng/helm/label';
               hlmBtn
               type="submit"
               class="w-full"
-              [disabled]="loginForm.invalid || isLoading"
+              [disabled]="form.invalid || isLoading"
             >
               @if (isLoading) {
                 <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -108,21 +113,27 @@ import { HlmLabel } from '@spartan-ng/helm/label';
   `
 })
 export class LoginComponent {
+  private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  protected email = '';
-  protected password = '';
   protected isLoading = false;
   protected errorMessage = '';
 
+  protected form = this.fb.nonNullable.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]]
+  });
+
   protected async onSubmit(): Promise<void> {
-    if (!this.email || !this.password) return;
+    if (this.form.invalid) return;
     this.isLoading = true;
     this.errorMessage = '';
 
+    const { email, password } = this.form.getRawValue();
+
     try {
-      const user = await this.authService.login(this.email, this.password);
+      const user = await this.authService.login(email, password);
       this.isLoading = false;
       if (user) {
         this.router.navigate(['/events']);
@@ -135,4 +146,3 @@ export class LoginComponent {
     }
   }
 }
-
