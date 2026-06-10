@@ -16,7 +16,7 @@ export const routes: Routes = [
       import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
   },
 
-  // Protected routes (with AppShell layout)
+  // Protected routes (with AppShell layout serving as a parent view with its own nested children)
   {
     path: '',
     canActivate: [authGuard],
