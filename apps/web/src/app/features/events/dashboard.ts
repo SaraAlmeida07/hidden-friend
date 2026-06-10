@@ -1,10 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DatePipe, CurrencyPipe } from '@angular/common';
-import { LucidePlus, LucideCalendarDays, LucideMapPin, LucideDollarSign } from '@lucide/angular';
+import { LucidePlus, LucideCalendarDays } from '@lucide/angular';
 import { EventService } from './event.service';
-import { HlmCardImports } from '@spartan-ng/helm/card';
-import { HlmBadge } from '@spartan-ng/helm/badge';
+import { EventCardComponent } from './event-card';
 import { HlmButton } from '@spartan-ng/helm/button';
 
 @Component({
@@ -13,14 +11,9 @@ import { HlmButton } from '@spartan-ng/helm/button';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
-    DatePipe,
-    CurrencyPipe,
     LucidePlus,
     LucideCalendarDays,
-    LucideMapPin,
-    LucideDollarSign,
-    ...HlmCardImports,
-    HlmBadge,
+    EventCardComponent,
     HlmButton
   ],
   template: `
@@ -59,33 +52,13 @@ import { HlmButton } from '@spartan-ng/helm/button';
           <!-- Event List -->
           <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @for (event of eventService.events(); track event.id) {
-              <a
-                [routerLink]="['/events', event.id, 'manage']"
-                hlmCard
-                class="hover:border-primary/40 hover:-translate-y-0.5 transition-all p-5 flex flex-col gap-4 text-card-foreground no-underline"
-              >
-                <div class="flex justify-between items-start gap-4">
-                  <h3 hlmCardTitle class="text-lg font-bold text-foreground leading-tight m-0">{{ event.name }}</h3>
-                  <span hlmBadge [variant]="event.status === 'draw_done' ? 'default' : 'secondary'">
-                    {{ event.status === 'pending' ? 'Pendente' : 'Realizado' }}
-                  </span>
+              @defer (on idle) {
+                <app-event-card [event]="event" />
+              } @placeholder {
+                <div class="h-[188px] w-full rounded-xl bg-card border border-border/60 animate-pulse flex items-center justify-center text-muted-foreground text-xs">
+                  Carregando informações...
                 </div>
-                
-                <div class="flex flex-col gap-2.5 mt-auto">
-                  <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                    <svg lucideCalendarDays class="w-4 h-4 text-primary stroke-current" aria-hidden="true"></svg>
-                    <span>{{ event.date | date:'dd/MM/yyyy' }}</span>
-                  </div>
-                  <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                    <svg lucideMapPin class="w-4 h-4 text-primary stroke-current" aria-hidden="true"></svg>
-                    <span>{{ event.location }}</span>
-                  </div>
-                  <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                    <svg lucideDollarSign class="w-4 h-4 text-primary stroke-current" aria-hidden="true"></svg>
-                    <span>{{ event.suggested_gift_value | currency:'BRL' }}</span>
-                  </div>
-                </div>
-              </a>
+              }
             }
           </section>
         }
