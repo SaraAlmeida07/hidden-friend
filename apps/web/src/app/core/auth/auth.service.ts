@@ -1,76 +1,103 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
+import { SupabaseService } from '../supabase/supabase.service';
 import { User } from '../models/user.model';
+import { Session } from '@supabase/supabase-js';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/users';
+  private supabaseService = inject(SupabaseService);
   
   // State
-  private userSignal = signal<User | null>(this.getStoredUser());
+  private userSignal = signal<User | null>(null);
+  private sessionSignal = signal<Session | null>(null);
+  private initializedSignal = signal<boolean>(false);
   
   // Selectors
   readonly currentUser = this.userSignal.asReadonly();
+  readonly currentSession = this.sessionSignal.asReadonly();
+  readonly isInitialized = this.initializedSignal.asReadonly();
   readonly isAuthenticated = computed(() => this.userSignal() !== null);
 
-  constructor() {}
-
-  private getStoredUser(): User | null {
-    const stored = localStorage.getItem('hf_user');
-    return stored ? JSON.parse(stored) : null;
+  constructor() {
+    // Listen to Auth state changes
+    this.supabaseService.client.auth.onAuthStateChange((event, session) => {
+      this.handleAuthStateChange(session);
+    });
+    
+    // Initialize session
+    this.initSession();
   }
 
-  private setStoredUser(user: User | null) {
-    if (user) {
-      localStorage.setItem('hf_user', JSON.stringify(user));
+  private async initSession() {
+    const { data: { session } } = await this.supabaseService.client.auth.getSession();
+    this.handleAuthStateChange(session);
+  }
+
+  private handleAuthStateChange(session: Session | null) {
+    this.sessionSignal.set(session);
+    if (session && session.user) {
+      const user: User = {
+        id: session.user.id,
+        email: session.user.email || '',
+        name: session.user.user_metadata['name'] || '',
+        password_hash: '',
+        created_at: session.user.created_at
+      };
+      this.userSignal.set(user);
     } else {
-      localStorage.removeItem('hf_user');
+      this.userSignal.set(null);
     }
-    this.userSignal.set(user);
+    this.initializedSignal.set(true);
   }
 
   async login(email: string, password_hash: string): Promise<User | null> {
-    try {
-      const response = await fetch(`${this.apiUrl}?email=${encodeURIComponent(email)}&password_hash=${encodeURIComponent(password_hash)}`);
-      if (!response.ok) return null;
-      const users: User[] = await response.json();
-      const user = users.length > 0 ? users[0] : null;
-      if (user) {
-        this.setStoredUser(user);
-      }
-      return user;
-    } catch {
-      return null;
-    }
-  }
-
-  async register(name: string, email: string, password_hash: string): Promise<User> {
-    const newUser = {
-      name,
+    const { data, error } = await this.supabaseService.client.auth.signInWithPassword({
       email,
-      password_hash,
-      created_at: new Date().toISOString()
-    };
-    
-    const response = await fetch(this.apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(newUser)
+      password: password_hash
     });
     
-    if (!response.ok) {
-      throw new Error('Erro ao registrar usuário');
+    if (error || !data.user) {
+      throw error || new Error('Falha no login');
     }
     
-    const user: User = await response.json();
-    this.setStoredUser(user);
+    const user: User = {
+      id: data.user.id,
+      email: data.user.email || '',
+      name: data.user.user_metadata['name'] || '',
+      password_hash: '',
+      created_at: data.user.created_at
+    };
+    
     return user;
   }
 
-  logout(): void {
-    this.setStoredUser(null);
+  async register(name: string, email: string, password_hash: string): Promise<User> {
+    const { data, error } = await this.supabaseService.client.auth.signUp({
+      email,
+      password: password_hash,
+      options: {
+        data: { name }
+      }
+    });
+    
+    if (error || !data.user) {
+      throw error || new Error('Falha no registro');
+    }
+    
+    const user: User = {
+      id: data.user.id,
+      email: data.user.email || '',
+      name: data.user.user_metadata['name'] || '',
+      password_hash: '',
+      created_at: data.user.created_at
+    };
+    
+    return user;
+  }
+
+  async logout(): Promise<void> {
+    await this.supabaseService.client.auth.signOut();
   }
 }
