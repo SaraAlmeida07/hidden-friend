@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, HostListener } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
@@ -9,5 +9,16 @@ import { RouterOutlet } from '@angular/router';
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App {}
+export class App {
+  protected isOffline = signal(!navigator.onLine);
 
+  @HostListener('window:offline')
+  protected onOffline(): void {
+    this.isOffline.set(true);
+  }
+
+  @HostListener('window:online')
+  protected onOnline(): void {
+    this.isOffline.set(false);
+  }
+}
