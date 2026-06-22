@@ -1,9 +1,6 @@
 {
-  "version": 2,
   "buildCommand": "npm run build:web",
   "outputDirectory": "apps/web/dist/web/browser",
-  "cleanUrls": true,
-  "framework": "angular",
   "rewrites": [
     {
       "source": "/(.*)",
