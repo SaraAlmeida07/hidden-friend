@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.vercel.hidden_friend_git_feature_fix_pwa_sara_s_projects_utfpr.twa",
+        "sha256_cert_fingerprints": ["8A:9C:90:83:46:94:8F:33:DC:7A:2C:A0:A4:B7:7C:BC:87:32:BA:E0:D6:F3:02:C6:24:05:A2:87:52:20:0E:8F"]
+      }
+    }]
